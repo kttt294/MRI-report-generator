@@ -1,0 +1,52 @@
+# ==========================================================
+# Cấu hình Huấn luyện V1: End-to-End VLM Spine Report Generation
+# ==========================================================
+
+# Mô hình nền tảng VLM
+# Khuyên dùng Qwen2.5-VL-3B-Instruct (chạy siêu mượt trên Colab T4 16GB VRAM, tiếng Việt rất giỏi)
+# Có thể đổi thành Qwen/Qwen2.5-VL-7B-Instruct nếu chạy Colab Pro / A100
+model:
+  name_or_path: "Qwen/Qwen2.5-VL-3B-Instruct"
+  torch_dtype: "bfloat16"
+  use_4bit_quantization: true       # Bật QLoRA 4-bit để tiết kiệm tối đa VRAM
+
+# Cấu hình LoRA (PEFT)
+lora:
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules:
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "gate_proj"
+    - "up_proj"
+    - "down_proj"
+
+# Đường dẫn dữ liệu
+data:
+  master_csv: "dataset/dataset_master.csv"
+  nifti_dir: "dataset/nifti"        # Đường dẫn tới thư mục chứa các file .nii.gz
+  image_cache_dir: "dataset/v1_cache_images"
+  language: "vi"                    # "vi" (tiếng Việt) hoặc "en" (tiếng Anh)
+  fold: 1                           # Sử dụng Fold 1 làm tập chia chuẩn
+  image_size: [384, 384]            # Kích thước ảnh 2D chuẩn hóa
+
+# Siêu tham số huấn luyện (Training Hyperparameters)
+training:
+  output_dir: "./checkpoints/v1_vlm_lora"
+  num_train_epochs: 5
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 8    # Effective batch size = 1 * 8 = 8
+  learning_rate: 2.0e-4
+  warmup_ratio: 0.05
+  lr_scheduler_type: "cosine"
+  logging_steps: 5
+  save_steps: 25
+  eval_steps: 25
+  evaluation_strategy: "steps"
+  save_total_limit: 2
+  fp16: false
+  bf16: true                        # T4/A100 hỗ trợ bf16 tốt
+  seed: 42

@@ -5,7 +5,9 @@
 dataset_local/
 dataset/*.csv
 dataset/*.jsonl
+dataset/*.json
 dataset/sft_data/
+dataset/v1_cache_images/
 !dataset/README.md
 
 # Large Reference Documents & Papers
