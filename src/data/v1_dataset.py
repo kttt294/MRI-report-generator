@@ -116,8 +116,8 @@ class SpineVLMDataset(Dataset):
             
             # Kiểm tra báo cáo mục tiêu
             if self.language == "vi":
-                mota = str(first_row.get("report_vi_mota", "")).strip()
-                ketluan = str(first_row.get("report_vi_ketluan", "")).strip()
+                mota = str(first_row.get("report_vi_findings", first_row.get("report_vi_mota", ""))).strip()
+                ketluan = str(first_row.get("report_vi_impression", first_row.get("report_vi_ketluan", ""))).strip()
                 if not mota and not ketluan:
                     continue
                 target_text = f"[MÔ TẢ]:\n{mota}\n\n[KẾT LUẬN]:\n{ketluan}"

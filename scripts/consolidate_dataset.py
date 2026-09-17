@@ -161,10 +161,15 @@ df_master["age_at_scan"] = df_master["patient_id"].map(lambda p: meta_records.ge
 df_master["birth_year"] = df_master["patient_id"].map(lambda p: meta_records.get(p, {}).get("birth_year", None))
 df_master["study_date"] = df_master["patient_id"].map(lambda p: meta_records.get(p, {}).get("study_date", ""))
 
-# Thêm báo cáo tiếng Việt
-df_master["report_vi_kythuat"] = df_master["patient_id"].map(lambda p: vi_reports.get(p, {}).get("ky_thuat", ""))
-df_master["report_vi_mota"] = df_master["patient_id"].map(lambda p: vi_reports.get(p, {}).get("report_vi_mota", ""))
-df_master["report_vi_ketluan"] = df_master["patient_id"].map(lambda p: vi_reports.get(p, {}).get("report_vi_ketluan", ""))
+# Thêm báo cáo tiếng Việt (Chuẩn hóa tiếng Anh + Giữ alias tương thích ngược)
+df_master["report_vi_technique"] = df_master["patient_id"].map(lambda p: vi_reports.get(p, {}).get("ky_thuat", ""))
+df_master["report_vi_findings"] = df_master["patient_id"].map(lambda p: vi_reports.get(p, {}).get("report_vi_mota", ""))
+df_master["report_vi_impression"] = df_master["patient_id"].map(lambda p: vi_reports.get(p, {}).get("report_vi_ketluan", ""))
+
+# Alias tương thích ngược cho các script cũ
+df_master["report_vi_kythuat"] = df_master["report_vi_technique"]
+df_master["report_vi_mota"] = df_master["report_vi_findings"]
+df_master["report_vi_ketluan"] = df_master["report_vi_impression"]
 
 # Thêm báo cáo tiếng Anh
 df_master["report_en"] = df_master["patient_id"].map(lambda p: en_reports.get(p, {}).get("report_en", ""))
@@ -223,6 +228,10 @@ for pid in all_patient_ids:
         "levels": levels_info,
         "reports": {
             "vi": {
+                "technique": vi_reports.get(pid, {}).get("ky_thuat", ""),
+                "findings": vi_reports.get(pid, {}).get("mo_ta_list", []),
+                "impression": vi_reports.get(pid, {}).get("ket_luan_list", []),
+                # Giữ alias tương thích ngược
                 "ky_thuat": vi_reports.get(pid, {}).get("ky_thuat", ""),
                 "mo_ta": vi_reports.get(pid, {}).get("mo_ta_list", []),
                 "ket_luan": vi_reports.get(pid, {}).get("ket_luan_list", [])
@@ -240,6 +249,12 @@ with open(patients_jsonl_path, "w", encoding="utf-8") as f:
     for item in patient_level_data:
         f.write(json.dumps(item, ensure_ascii=False) + "\n")
 print(f" -> Đã lưu: {patients_jsonl_path} ({len(patient_level_data)} ca bệnh nhân).")
+
+# Lưu tệp mẫu 1 bệnh nhân với cấu trúc đẹp mắt
+sample_patient_path = OUT_DIR / "data_of_1patient.json"
+with open(sample_patient_path, "w", encoding="utf-8") as f:
+    json.dump(patient_level_data[0], f, ensure_ascii=False, indent=2)
+print(f" -> Đã lưu mẫu chuẩn: {sample_patient_path}")
 
 # 8. TẠO DATASET HUẤN LUYỆN SFT CHO FOLD 1 (Prompt -> Response)
 def format_vi_prompt(levels_info, demo):
@@ -263,8 +278,10 @@ def format_vi_prompt(levels_info, demo):
     return prompt
 
 def format_vi_response(rep_vi):
-    mota = "\n".join(f"- {c}" for c in rep_vi.get("mo_ta", []))
-    ketluan = "\n".join(f"- {c}" for c in rep_vi.get("ket_luan", []))
+    findings_list = rep_vi.get("findings", rep_vi.get("mo_ta", []))
+    impression_list = rep_vi.get("impression", rep_vi.get("ket_luan", []))
+    mota = "\n".join(f"- {c}" for c in findings_list)
+    ketluan = "\n".join(f"- {c}" for c in impression_list)
     return f"[MÔ TẢ]:\n{mota}\n\n[KẾT LUẬN]:\n{ketluan}"
 
 def format_en_prompt(levels_info, demo):

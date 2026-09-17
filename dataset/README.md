@@ -44,15 +44,17 @@ Mỗi dòng đại diện cho một tầng đĩa đệm cụ thể của bệnh 
   * `volume`, `spacing_i`, `spacing_j`, `spacing_k`: Kích thước và độ dày lát cắt ($4.4\text{ mm}$).
 * **Phân chia 5-Fold:** `fold1_split`, `fold2_split`, `fold3_split`, `fold4_split`, `fold5_split` (`train`, `val`, `test`).
 * **Văn bản báo cáo:**
-  * `report_vi_kythuat`: Kỹ thuật chụp (tiếng Việt).
-  * `report_vi_mota`: Toàn bộ các câu mô tả (tiếng Việt).
-  * `report_vi_ketluan`: Phần kết luận lâm sàng (tiếng Việt).
+  * `report_vi_technique` (alias `report_vi_kythuat`): Kỹ thuật xung chụp (tiếng Việt).
+  * `report_vi_findings` (alias `report_vi_mota`): Toàn bộ các câu mô tả chi tiết (tiếng Việt).
+  * `report_vi_impression` (alias `report_vi_ketluan`): Phần kết luận lâm sàng (tiếng Việt).
   * `report_en`: Bản Clinician's Notes (tiếng Anh).
 
-### B. `dataset_patients.jsonl` (247 dòng)
+### B. `dataset_patients.jsonl` (247 dòng) & `data_of_1patient.json`
 Mỗi dòng là một JSON độc lập biểu diễn một bệnh nhân hoàn chỉnh:
 * Chứa mảng `levels`: bao gồm đầy đủ 5 tầng kèm toạ độ và nhãn.
-* Chứa trường `reports`: tách biệt tiếng Việt (`mo_ta[]`, `ket_luan[]`) và tiếng Anh.
+* Chứa trường `reports`: chuẩn hóa theo chuẩn quốc tế:
+  * `reports.vi`: `technique`, `findings[]`, `impression[]` (kèm alias `ky_thuat`, `mo_ta`, `ket_luan`).
+  * `reports.en`: `clinicians_notes`, `split`.
 * Rất thuận tiện để load vào Python:
   ```python
   import json
