@@ -101,6 +101,16 @@ Audit hiện có cho thấy các mức độ khác biệt sau:
 | Ưu tiên B: khác mapping/định nghĩa/diễn đạt | 112 |
 | Ưu tiên C: chưa có cờ xung đột | 83 |
 
+### Ý nghĩa của A và B
+
+Đây là nhãn **ưu tiên của hàng đợi audit**, không phải nhãn đúng/sai và không phải hai bác sĩ khác nhau:
+
+- **A — `A_patient_or_internal`**: cần xem trước vì có dấu hiệu mâu thuẫn mạnh ở cấp bệnh nhân hoặc ngay trong report. Cụ thể gồm: report mô tả tổn thương dạng displacement nhưng toàn bộ `disc_herniation` và `disc_bulging` đều bằng 0; mismatch ở `spondylolisthesis` hoặc `modic`; hoặc cùng report tự chứa tín hiệu trái ngược. Đây là nhóm 43/238 bệnh nhân có report được đưa vào queue.
+- **B — `B_level_or_definition`**: chưa có dấu hiệu mâu thuẫn mạnh như A, nhưng có khác biệt cần xác minh về tầng, định nghĩa hoặc cách diễn đạt. Ví dụ report nói thoát vị/phình ở một tầng nhưng grading dương ở tầng khác; khác nhau giữa bulging và herniation; hoặc mismatch `disc_narrowing`. Đây là nhóm 112/238 bệnh nhân.
+- **C — `C_no_flag_not_adjudicated`**: không bị parser gắn cờ trong lần audit đó, nhưng chưa có nghĩa là đã được bác sĩ xác nhận. Có 83/238 bệnh nhân.
+
+Mẫu số của A+B+C là **238**, tức số bệnh nhân có report tiếng Việt để đối chiếu; 9 bệnh nhân thiếu findings nên không được xem là “không có conflict”.
+
 Theo feature, số bệnh nhân có mismatch được audit ghi nhận là: disc herniation 18, disc bulging 39, spondylolisthesis 17, Modic 5, disc narrowing 69 và endplate-any 15. Disc narrowing có chênh lệch cao nhất trong bộ parser hiện tại. Tuy nhiên các số này là **patient có ít nhất một khác biệt**, không phải tỷ lệ lỗi trên từng nhãn và không chứng minh ai đúng.
 
 Audit parser đã kiểm tra các trường hợp dễ nhầm như phủ định toàn câu, Schmorl, thành đốt sống, fissure, laterality, root level và từ “lồi/phình”. Dù vậy parser không thay thế việc bác sĩ adjudicate. Không nên gán lại toàn bộ dataset chỉ vì 131 ca có khác biệt. Nên:
