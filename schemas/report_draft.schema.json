@@ -1,0 +1,58 @@
+{
+  "$defs": {
+    "Statement": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 40,
+          "minItems": 1,
+          "title": "Evidence Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "evidence_ids"
+      ],
+      "title": "Statement",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/Statement"
+      },
+      "maxItems": 40,
+      "minItems": 1,
+      "title": "Findings",
+      "type": "array"
+    },
+    "impression": {
+      "items": {
+        "$ref": "#/$defs/Statement"
+      },
+      "maxItems": 40,
+      "minItems": 1,
+      "title": "Impression",
+      "type": "array"
+    }
+  },
+  "required": [
+    "findings",
+    "impression"
+  ],
+  "title": "ReportDraft",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

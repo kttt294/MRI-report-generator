@@ -1,94 +1,37 @@
-# Calibrated Level-wise Spine MRI Report Generation
-### Sinh báo cáo MRI cột sống theo mức có hiệu chuẩn độ bất định dùng mô hình ngôn ngữ y tế và kỹ thuật LoRA
+# MRI report generation — V1 và V2
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-orange.svg)](https://pytorch.org/)
-[![HuggingFace](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-PEFT%20%2F%20TRL-yellow)](https://huggingface.co/)
-[![License](https://img.shields.io/badge/License-Research_Only-green.svg)](#)
+Dự án nghiên cứu sinh báo cáo MRI cột sống thắt lưng tiếng Việt theo hai hướng:
 
----
+- **V1:** ảnh NIfTI → các lát sagittal chọn bằng quy tắc → Qwen2.5-VL + QLoRA → findings và impression. Mặc định một lát giữa; có thể cấu hình nhiều lát như một ablation riêng.
+- **V2, hướng A:** JSON gồm tám nhãn grading của năm tầng → report engine. Hiện dùng annotation thay đầu ra vision; vision engine và calibration chưa được xây dựng.
 
-## 📖 Giới thiệu đề tài (Introduction)
+Bắt đầu với [hướng dẫn Kaggle cho người mới](docs/README_KAGGLE.md), [trạng thái và lệnh chạy](docs/implementation_status.md), [implementation plan](docs/implementation_plan_v1_v2_report.md).
 
-Bài toán **Sinh báo cáo chẩn đoán hình ảnh (Medical Report Generation - MRG)** đóng vai trò quan trọng trong việc hỗ trợ bác sĩ giảm tải áp lực gõ văn bản lâm sàng. Với hình ảnh **cộng hưởng từ (MRI) cột sống**, các mô hình AI thường gặp phải 2 thách thức cốt tử:
-1. **Lỗi gán sai vị trí giải phẫu (Mislocalization):** Cột sống gồm nhiều tầng đĩa đệm liên tiếp (`L1/L2` đến `L5/S1`). Mô hình sinh văn bản tự do rất dễ bị ảo giác, gán nhầm tổn thương tầng này sang tầng khác.
-2. **Tự tin thái quá tại vùng ranh giới liên tục (Overconfident Misclassification):** Thoái hóa hay hẹp ống sống mang tính thứ bậc liên tục (*Bình thường $\to$ Nhẹ $\to$ Vừa $\to$ Nặng*). Việc ép mô hình chọn nhãn cứng (hard label) gây ra sai lầm lâm sàng nguy hiểm.
+## Notebook Kaggle
 
-###  Giải pháp của nghiên cứu:
-Dự án đề xuất một **Hệ thống module hóa (Modular Architecture)** kết hợp giữa **Hiệu chuẩn độ bất định (Uncertainty Calibration / Conformal Prediction)** và **Mô hình ngôn ngữ y tế (MedGemma / Qwen2.5) tinh chỉnh bằng kỹ thuật LoRA**:
-* **Xử lý theo tầng (Level-wise):** Bóc tách và định vị độc lập 5 tầng đĩa đệm từ `L1/L2` đến `L5/S1`.
-* **Hiệu chuẩn xác suất 2 lớp:** Sử dụng *Temperature Scaling* giảm sai số ECE và *Dự báo Conformal* đưa ra tập chẩn đoán có bảo chứng xác suất $1 - \alpha$, cho phép mô hình phát biểu *"chưa phân định được"* thay vì đoán mò.
-* **Sinh văn bản có kiểm soát:** Ánh xạ từ chỉ thị bất định sang cụm từ y khoa chuẩn mực, sinh báo cáo chi tiết cho từng tầng (hỗ trợ cả tiếng Việt và tiếng Anh).
+- [V1 training / resume / inference](notebooks/Kaggle_V1_Training.ipynb)
+- [V2 report: template hoặc LLM](notebooks/Kaggle_V2_Report.ipynb)
+- [V2 LoRA: chỉ target đã duyệt](notebooks/Kaggle_V2_Training.ipynb)
 
----
+Notebook tải code từ repo public và gọi `.py`. Dữ liệu ảnh/annotations ở hai Kaggle Dataset private; outputs và notebook chạy dữ liệu thật giữ private. Không đưa dữ liệu bệnh nhân hoặc model weights lên GitHub.
 
-## 🏗️ Kiến trúc hệ thống (System Architecture)
+## V2 contract
 
-```mermaid
-flowchart LR
-    A["Ảnh MRI Cột sống (Sagittal + Axial)"] 
-    --> B["Module Thị giác & Định vị tâm đĩa (disc_localization)"]
-    --> C["Bảng phát hiện bệnh lý có cấu trúc (JSON / Tabular)"]
-    --> D["Bộ hiệu chuẩn độ bất định (Temperature Scaling + Conformal Prediction)"]
-    --> E["Prompt Engine (Chỉ thị cụm từ chắc chắn)"]
-    --> F["MedGemma / Qwen2.5 + LoRA Fine-Tuning"]
-    --> G["Báo cáo lâm sàng hoàn chỉnh (Mô tả & Kết luận)"]
-```
+`src/contracts/report_input.py` là contract suy luận có kiểm tra kiểu/domain/status/tầng. JSON schemas ở `schemas/`; kiểm tra logic liên trường vẫn phải dùng Pydantic. `reports`, demographic, tọa độ và folds không thuộc input của report engine. Giá trị thiếu là `null`, không phải `0`; không sinh confidence giả.
 
----
+V2 có template baseline, backend Hugging Face, kiểm tra catalog, tối đa một lần repair và fallback được ghi rõ. Validator hiện dùng câu có kiểm soát, không phải bộ đánh giá ngôn ngữ y khoa tự do. `needs_review` phản ánh QC input chưa được xác nhận. Không dùng độ khớp grading để khẳng định chẩn đoán đúng trên MRI.
 
-## 📂 Cấu trúc mã nguồn (Repository Structure)
+## Kiểm thử
 
-```text
-├── dataset/                  # Dữ liệu tinh gọn, sẵn sàng cho huấn luyện (Xem dataset/README.md)
-│   ├── dataset_master.csv    # Bảng tổng hợp phẳng 1.235 dòng (247 ca x 5 tầng)
-│   ├── dataset_patients.jsonl# Cấu trúc dữ liệu cấp bệnh nhân
-│   └── sft_data/             # Bộ dữ liệu Prompt-Response SFT (Fold 1: train/val/test)
-├── scripts/                  # Các script tiền xử lý & tiện ích
-│   └── consolidate_dataset.py# Script tự động tổng hợp từ dữ liệu phân mảnh
-├── src/                      # Mã nguồn cốt lõi (Core modules)
-│   ├── calibration/          # Module Temperature Scaling & Conformal Prediction (Upcoming)
-│   ├── models/               # Tích hợp MedGemma / LoRA PEFT (Upcoming)
-│   └── evaluation/           # Đánh giá ECE, Coverage, BLEU, ROUGE, Clinical F1 (Upcoming)
-├── .gitignore                # Bảo vệ dữ liệu bệnh nhân và model weights
-└── README.md                 # Tài liệu này
-```
-
----
-
-## 🚀 Hướng dẫn bắt đầu nhanh (Quickstart)
-
-### 1. Cài đặt môi trường
 ```bash
-git clone https://github.com/kttt294/MRI-report-generator.git
-cd MRI-report-generator
-
-python -m venv venv
-# Trên Windows:
-venv\Scripts\activate
-# Trên Linux/macOS:
-source venv/bin/activate
-
-pip install -r requirements.txt
+python -m pytest -q
+python scripts/check_environment.py
 ```
 
-### 2. Chuẩn bị dữ liệu
-Chạy script tổng hợp dữ liệu từ thư mục `dataset_local/`:
-```bash
-python scripts/consolidate_dataset.py
-```
-Toàn bộ dữ liệu sạch, đã gắn nhãn và chia 5-fold cross validation sẽ được tạo tự động tại thư mục `dataset/`.
+Giữ cặp torch/torchvision CUDA do Kaggle cung cấp; cài `requirements-kaggle.txt`. Bộ test dùng dữ liệu giả lập, không tải model hay dữ liệu bệnh nhân. Kiểm thử CPU và template đã thực hiện; GPU Kaggle, ảnh thật, chất lượng LLM và đánh giá bác sĩ vẫn cần nghiệm thu. Xem bằng chứng cụ thể trong tài liệu trạng thái.
 
----
+## Dữ liệu và nghiên cứu
 
-## 📊 Tiêu chí đánh giá (Evaluation Protocol)
+SFT legacy được giữ để truy vết/thí nghiệm, không được coi là target đầy đủ phù hợp cho V2 chỉ có tám nhãn. Target V2 phải có review và liên kết đúng hash input. Các báo cáo đầy đủ của bác sĩ có thể chứa thông tin ngoài grading; đó không tự động là lỗi nhãn.
 
-Nghiên cứu đánh giá đa chiều trên 3 trục:
-1. **Chất lượng sinh ngôn ngữ (NLP Metrics):** BLEU-1/2/4, ROUGE-1/L, METEOR, BERTScore.
-2. **Độ tin cậy & Hiệu chuẩn xác suất (Calibration Metrics):** ECE (Expected Calibration Error), MCE (Maximum Calibration Error), Empirical Coverage Rate ($1 - \alpha$).
-3. **Độ chính xác lâm sàng (Clinical Efficacy F1):** Trích xuất thực thể bệnh lý (Thoát vị, Hẹp ống sống, Modic, Phình đĩa đệm) so với Ground Truth bác sĩ.
-
----
-
-## 📜 Điều kiện sử dụng & Bản quyền dữ liệu
-Dữ liệu nghiên cứu gốc (PSPINES) là dữ liệu bệnh nhân đã được khử định danh theo chuẩn **DICOM PS3.15**. Để đảm bảo đạo đức nghiên cứu y sinh, dữ liệu ảnh gốc và thông tin bệnh nhân không được phân phối công khai và đã được loại trừ khỏi kho mã nguồn thông qua `.gitignore`.
+Dữ liệu PSPINES không phân phối công khai. Tuân thủ quyền sử dụng của nguồn dữ liệu; `.gitignore` loại ảnh, dữ liệu gốc, derived outputs và checkpoint khỏi repo. Không có kết quả calibration, tỷ lệ lỗi LLM hoặc hiệu quả lâm sàng được khẳng định khi chưa đo.

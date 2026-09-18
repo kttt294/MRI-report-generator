@@ -1,0 +1,296 @@
+{
+  "$defs": {
+    "BinaryObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "status": {
+          "enum": [
+            "observed",
+            "missing",
+            "not_assessed",
+            "uncertain"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "uncertainty": {
+          "default": null,
+          "title": "Uncertainty",
+          "type": "null"
+        }
+      },
+      "required": [
+        "value",
+        "status"
+      ],
+      "title": "BinaryObservation",
+      "type": "object"
+    },
+    "Grading": {
+      "additionalProperties": false,
+      "properties": {
+        "pfirrmann_grade": {
+          "$ref": "#/$defs/PfirrmannObservation"
+        },
+        "modic": {
+          "$ref": "#/$defs/ModicObservation"
+        },
+        "disc_herniation": {
+          "$ref": "#/$defs/BinaryObservation"
+        },
+        "disc_bulging": {
+          "$ref": "#/$defs/BinaryObservation"
+        },
+        "disc_narrowing": {
+          "$ref": "#/$defs/BinaryObservation"
+        },
+        "spondylolisthesis": {
+          "$ref": "#/$defs/BinaryObservation"
+        },
+        "up_endplate": {
+          "$ref": "#/$defs/BinaryObservation"
+        },
+        "low_endplate": {
+          "$ref": "#/$defs/BinaryObservation"
+        }
+      },
+      "required": [
+        "pfirrmann_grade",
+        "modic",
+        "disc_herniation",
+        "disc_bulging",
+        "disc_narrowing",
+        "spondylolisthesis",
+        "up_endplate",
+        "low_endplate"
+      ],
+      "title": "Grading",
+      "type": "object"
+    },
+    "Level": {
+      "additionalProperties": false,
+      "properties": {
+        "level": {
+          "enum": [
+            "L1/L2",
+            "L2/L3",
+            "L3/L4",
+            "L4/L5",
+            "L5/S1"
+          ],
+          "title": "Level",
+          "type": "string"
+        },
+        "gradings": {
+          "$ref": "#/$defs/Grading"
+        }
+      },
+      "required": [
+        "level",
+        "gradings"
+      ],
+      "title": "Level",
+      "type": "object"
+    },
+    "ModicObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "maximum": 3,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "status": {
+          "enum": [
+            "observed",
+            "missing",
+            "not_assessed",
+            "uncertain"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "uncertainty": {
+          "default": null,
+          "title": "Uncertainty",
+          "type": "null"
+        }
+      },
+      "required": [
+        "value",
+        "status"
+      ],
+      "title": "ModicObservation",
+      "type": "object"
+    },
+    "PfirrmannObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "maximum": 5,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "status": {
+          "enum": [
+            "observed",
+            "missing",
+            "not_assessed",
+            "uncertain"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "uncertainty": {
+          "default": null,
+          "title": "Uncertainty",
+          "type": "null"
+        }
+      },
+      "required": [
+        "value",
+        "status"
+      ],
+      "title": "PfirrmannObservation",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "enum": [
+            "dataset_grading",
+            "vision_prediction",
+            "synthetic_fixture"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        },
+        "source_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Source Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "version",
+        "source_sha256"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "Quality": {
+      "additionalProperties": false,
+      "properties": {
+        "level_mapping": {
+          "enum": [
+            "unverified",
+            "verified"
+          ],
+          "title": "Level Mapping",
+          "type": "string"
+        },
+        "ontology_review": {
+          "default": "unverified",
+          "enum": [
+            "unverified",
+            "verified"
+          ],
+          "title": "Ontology Review",
+          "type": "string"
+        }
+      },
+      "required": [
+        "level_mapping"
+      ],
+      "title": "Quality",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "report-input/1.0",
+      "default": "report-input/1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "ontology_version": {
+      "const": "pspines-grading/1.0",
+      "default": "pspines-grading/1.0",
+      "title": "Ontology Version",
+      "type": "string"
+    },
+    "scope": {
+      "const": "lumbar_grading_8_fields",
+      "default": "lumbar_grading_8_fields",
+      "title": "Scope",
+      "type": "string"
+    },
+    "case_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Case Id",
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "quality": {
+      "$ref": "#/$defs/Quality"
+    },
+    "levels": {
+      "items": {
+        "$ref": "#/$defs/Level"
+      },
+      "maxItems": 5,
+      "minItems": 5,
+      "title": "Levels",
+      "type": "array"
+    }
+  },
+  "required": [
+    "case_id",
+    "provenance",
+    "quality",
+    "levels"
+  ],
+  "title": "ReportRequest",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

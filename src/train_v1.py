@@ -1,184 +1,119 @@
-"""
-Script: src.train_v1
-Mục đích: Huấn luyện mô hình V1 End-to-End Vision-Language Model
-trên dữ liệu MRI cột sống bằng kỹ thuật LoRA.
-"""
-
-import os
-import sys
-import yaml
+"""Train V1 using shared CLI/config; preflight always precedes model loading."""
 import argparse
+import sys
 from pathlib import Path
-from typing import Dict, List, Any
-import torch
-from torch.utils.data import DataLoader
-from transformers import (
-    Trainer,
-    TrainingArguments,
-    DataCollatorForSeq2Seq
-)
-
-# Thêm thư mục gốc vào path để import
-sys.path.append(str(Path(__file__).resolve().parent.parent))
-
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+import yaml
+from src.io_utils import file_hash, content_hash, write_json, environment_receipt
 from src.data.v1_dataset import SpineVLMDataset
-from src.models.v1_vlm import load_vlm_and_processor
+from src.data.vlm_collator import VLMDataCollator
 
 
-class VLMDataCollator:
-    """
-    Data Collator định dạng batch cho Vision-Language Model.
-    Tự động gắn thẻ ảnh, tạo input_ids và che nhãn (mask) phần câu hỏi,
-    chỉ tính đạo hàm loss trên phần câu trả lời của bác sĩ.
-    """
-    def __init__(self, processor, max_length: int = 512):
-        self.processor = processor
-        self.max_length = max_length
-
-    def __call__(self, batch: List[Dict[str, Any]]) -> Dict[str, torch.Tensor]:
-        texts = []
-        images = []
-        
-        for item in batch:
-            conv = item["conversation"]
-            # Áp dụng template hội thoại của mô hình
-            text = self.processor.apply_chat_template(
-                conv, tokenize=False, add_generation_prompt=False
-            )
-            texts.append(text)
-            images.append(item["image"])
-
-        # Mã hoá ảnh và chữ đồng thời
-        batch_inputs = self.processor(
-            text=texts,
-            images=images,
-            padding=True,
-            truncation=True,
-            max_length=self.max_length,
-            return_tensors="pt"
-        )
-
-        labels = batch_inputs["input_ids"].clone()
-        # Thay thế token pad bằng -100 để không tính loss
-        if self.processor.tokenizer.pad_token_id is not None:
-            labels[labels == self.processor.tokenizer.pad_token_id] = -100
-            
-        # Che token ảnh để không tính loss trên điểm ảnh
-        image_token_id = getattr(self.processor.tokenizer, "image_token_id", None)
-        if image_token_id is not None:
-            labels[labels == image_token_id] = -100
-
-        batch_inputs["labels"] = labels
-        return batch_inputs
+def make_dataset(config, split, require_images=True):
+    d = config["data"]
+    return SpineVLMDataset(d["master_csv"], d["nifti_dir"], split, d.get("fold", 1), d.get("language", "vi"),
+        image_cache_dir=d.get("image_cache_dir"), target_size=d.get("image_size", [384, 384]),
+        offsets=d.get("slice_offsets", [0]), slice_selection=d.get("slice_selection", "middle"),
+        require_both_sections=d.get("require_both_sections", True), require_images=require_images)
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description="Huấn luyện V1 End-to-End VLM")
-    parser.add_argument("--config", type=str, default="configs/v1_config.yaml", help="Đường dẫn file cấu hình YAML")
-    parser.add_argument("--master_csv", type=str, default=None, help="Đè đường dẫn file CSV tổng hợp")
-    parser.add_argument("--nifti_dir", type=str, default=None, help="Đè đường dẫn thư mục NIfTI")
-    parser.add_argument("--output_dir", type=str, default=None, help="Đè thư mục lưu checkpoint")
-    parser.add_argument("--epochs", type=int, default=None, help="Đè số epoch huấn luyện")
-    return parser.parse_args()
+def code_fingerprint():
+    root = Path(__file__).resolve().parents[1]
+    return content_hash({str(p.relative_to(root)).replace(chr(92), "/"): file_hash(p)
+                         for folder in ("src", "scripts") for p in sorted((root / folder).rglob("*.py"))})
+
+
+def train(config, resume_from=None, max_runtime_minutes=None, smoke=False):
+    from src.models.v1_vlm import load_vlm_and_processor
+    from src.models.runtime import choose_dtype
+    from src.training.checkpoints import CompleteCheckpointCallback, prepare_resume
+    from transformers import TrainingArguments, set_seed
+    from src.training.trainer import FiniteLossTrainer as Trainer
+    import torch
+    cfg = config["training"]
+    set_seed(cfg.get("seed", 42))
+    output = Path(cfg["output_dir"])
+    if output.exists() and any(output.iterdir()):
+        raise ValueError("Use a new empty run output directory, including when resuming")
+    train_set, val_set = make_dataset(config, "train"), make_dataset(config, "val")
+    output.mkdir(parents=True, exist_ok=True)
+    write_json(output / "data_manifest.json", [train_set.manifest(), val_set.manifest()])
+    if smoke:
+        train_set.samples = train_set.samples[:2]
+        val_set.samples = val_set.samples[:2]
+    model, processor = load_vlm_and_processor(config)
+    collator = VLMDataCollator(processor, config["data"].get("max_sequence_length", 4096))
+    lengths = []
+    # Verify every eligible sequence before training; this also validates all images.
+    for dataset in (train_set, val_set):
+        for i in range(len(dataset)):
+            batch = collator([dataset[i]])
+            lengths.append({"tokens": int(batch["attention_mask"].sum()), "target_tokens": int((batch["labels"] != -100).sum())})
+    write_json(output / "token_preflight.json", lengths)
+    stable_training = {k: v for k, v in cfg.items() if k not in {"output_dir", "logging_steps", "save_total_limit"}}
+    identity = {"code": code_fingerprint(), "master": file_hash(config["data"]["master_csv"]),
+                "model": config["model"], "resolved_revision": getattr(model.config, "_commit_hash", None),
+                "training": stable_training, "lora": config["lora"], "smoke": smoke,
+                "data": {k: v for k, v in config["data"].items() if k not in {"master_csv", "nifti_dir", "image_cache_dir"}}}
+    if resume_from:
+        resume_from = prepare_resume(resume_from, output / "resume_input", identity)
+    write_json(output / "run_manifest.json", {"identity": identity, "config": config,
+        "environment": environment_receipt(), "resumed_from": str(resume_from) if resume_from else None})
+    dtype = choose_dtype(config["model"].get("torch_dtype", "auto"))
+    interval = 2 if smoke else cfg.get("save_steps", 25)
+    arguments = TrainingArguments(output_dir=str(output), num_train_epochs=cfg["num_train_epochs"],
+        max_steps=2 if smoke else cfg.get("max_steps", -1),
+        per_device_train_batch_size=cfg.get("per_device_train_batch_size", 1), per_device_eval_batch_size=1,
+        gradient_accumulation_steps=1 if smoke else cfg.get("gradient_accumulation_steps", 8),
+        learning_rate=float(cfg["learning_rate"]), warmup_ratio=cfg.get("warmup_ratio", .05),
+        lr_scheduler_type=cfg.get("lr_scheduler_type", "cosine"),
+        logging_steps=1 if smoke else cfg.get("logging_steps", 5), save_steps=interval, eval_steps=interval,
+        eval_strategy="steps", save_strategy="steps", save_total_limit=cfg.get("save_total_limit", 2),
+        load_best_model_at_end=True, metric_for_best_model="eval_loss", greater_is_better=False,
+        fp16=dtype == torch.float16, bf16=dtype == torch.bfloat16,
+        gradient_checkpointing=True, gradient_checkpointing_kwargs={"use_reentrant": False},
+        optim="adamw_torch", remove_unused_columns=False, report_to="none", seed=cfg.get("seed", 42))
+    trainer = Trainer(model=model, args=arguments, train_dataset=train_set, eval_dataset=val_set,
+        data_collator=collator, processing_class=processor,
+        callbacks=[CompleteCheckpointCallback(processor, identity, max_runtime_minutes)])
+    result = trainer.train(resume_from_checkpoint=str(resume_from) if resume_from else None)
+    complete = trainer.state.global_step >= trainer.state.max_steps
+    destination = output / ("final_adapter" if complete else "latest_adapter")
+    trainer.model.save_pretrained(destination)
+    processor.save_pretrained(destination)
+    if smoke:
+        # Reload the saved adapter into the same base (avoids a second GPU copy).
+        trainer.model.load_adapter(str(destination), adapter_name="smoke_reload", is_trainable=False)
+        trainer.model.set_adapter("smoke_reload")
+        trainer.model.eval()
+        with torch.inference_mode():
+            batch = {k: v.to(trainer.model.device) for k, v in collator([val_set[0]]).items()}
+            loss = trainer.model(**batch).loss
+        if not torch.isfinite(loss): raise RuntimeError("Reloaded adapter smoke loss is not finite")
+        write_json(output / "smoke_reload.json", {"finite_loss": True, "loss": float(loss)})
+    write_json(output / "train_result.json", {"completed": complete, "global_step": trainer.state.global_step,
+        "planned_steps": trainer.state.max_steps, "best_model_checkpoint": trainer.state.best_model_checkpoint,
+        "metrics": result.metrics, "adapter_path": str(destination), "smoke": smoke})
+    return output
 
 
 def main():
-    args = parse_args()
-    
-    # Nạp file cấu hình
-    with open(args.config, "r", encoding="utf-8") as f:
-        config = yaml.safe_load(f)
-        
-    # Ghi đè tham số dòng lệnh (nếu có)
-    if args.master_csv: config["data"]["master_csv"] = args.master_csv
-    if args.nifti_dir: config["data"]["nifti_dir"] = args.nifti_dir
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--config", default="configs/v1_config.yaml")
+    parser.add_argument("--master_csv")
+    parser.add_argument("--nifti_dir")
+    parser.add_argument("--output_dir")
+    parser.add_argument("--epochs", type=int)
+    parser.add_argument("--resume-from")
+    parser.add_argument("--max-runtime-minutes", type=float)
+    parser.add_argument("--smoke", action="store_true")
+    args = parser.parse_args()
+    config = yaml.safe_load(Path(args.config).read_text(encoding="utf-8"))
+    for key in ("master_csv", "nifti_dir"):
+        if getattr(args, key): config["data"][key] = getattr(args, key)
     if args.output_dir: config["training"]["output_dir"] = args.output_dir
     if args.epochs: config["training"]["num_train_epochs"] = args.epochs
-
-    train_cfg = config["training"]
-    data_cfg = config["data"]
-    
-    output_dir = Path(train_cfg["output_dir"])
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    print("=" * 60)
-    print("KHỞI ĐỘNG PIPELINE HUẤN LUYỆN V1 (END-TO-END VLM)")
-    print(f"Mô hình: {config['model']['name_or_path']}")
-    print(f"Ngôn ngữ: {data_cfg['language']} | Fold: {data_cfg['fold']}")
-    print(f"Đầu ra: {output_dir.resolve()}")
-    print("=" * 60)
-
-    # 1. Nạp Model và Processor
-    model, processor = load_vlm_and_processor(config)
-
-    # 2. Chuẩn bị Dataset
-    print("\n[Data] Đang chuẩn bị tập dữ liệu Train và Validation...")
-    train_dataset = SpineVLMDataset(
-        master_csv=data_cfg["master_csv"],
-        nifti_dir=data_cfg["nifti_dir"],
-        split="train",
-        fold=data_cfg["fold"],
-        language=data_cfg["language"],
-        image_cache_dir=data_cfg.get("image_cache_dir"),
-        target_size=tuple(data_cfg.get("image_size", [384, 384])),
-        processor=processor
-    )
-    
-    val_dataset = SpineVLMDataset(
-        master_csv=data_cfg["master_csv"],
-        nifti_dir=data_cfg["nifti_dir"],
-        split="val",
-        fold=data_cfg["fold"],
-        language=data_cfg["language"],
-        image_cache_dir=data_cfg.get("image_cache_dir"),
-        target_size=tuple(data_cfg.get("image_size", [384, 384])),
-        processor=processor
-    )
-
-    data_collator = VLMDataCollator(processor=processor)
-
-    # 3. Cấu hình TrainingArguments
-    training_args = TrainingArguments(
-        output_dir=str(output_dir),
-        num_train_epochs=train_cfg["num_train_epochs"],
-        per_device_train_batch_size=train_cfg["per_device_train_batch_size"],
-        gradient_accumulation_steps=train_cfg["gradient_accumulation_steps"],
-        learning_rate=float(train_cfg["learning_rate"]),
-        warmup_ratio=train_cfg.get("warmup_ratio", 0.05),
-        lr_scheduler_type=train_cfg.get("lr_scheduler_type", "cosine"),
-        logging_steps=train_cfg.get("logging_steps", 5),
-        save_steps=train_cfg.get("save_steps", 25),
-        eval_steps=train_cfg.get("eval_steps", 25),
-        eval_strategy=train_cfg.get("evaluation_strategy", "steps"),
-        save_total_limit=train_cfg.get("save_total_limit", 2),
-        fp16=train_cfg.get("fp16", False),
-        bf16=train_cfg.get("bf16", True) if torch.cuda.is_available() and torch.cuda.is_bf16_supported() else False,
-        remove_unused_columns=False,
-        report_to="none",
-        seed=train_cfg.get("seed", 42)
-    )
-
-    # 4. Khởi tạo Trainer
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        train_dataset=train_dataset,
-        eval_dataset=val_dataset,
-        data_collator=data_collator
-    )
-
-    # 5. Bắt đầu huấn luyện
-    print("\n[Training] Bắt đầu quá trình tối ưu hoá trọng số LoRA...")
-    train_result = trainer.train()
-
-    # 6. Lưu LoRA Adapter và Processor
-    print(f"\n[Save] Đang lưu LoRA adapter cuối cùng tại {output_dir}...")
-    trainer.model.save_pretrained(str(output_dir / "final_adapter"))
-    processor.save_pretrained(str(output_dir / "final_adapter"))
-
-    print("\n" + "=" * 60)
-    print(f"HUẤN LUYỆN V1 THÀNH CÔNG! Checkpoint lưu tại: {output_dir / 'final_adapter'}")
-    print("=" * 60)
+    train(config, args.resume_from, args.max_runtime_minutes, args.smoke)
 
 
 if __name__ == "__main__":

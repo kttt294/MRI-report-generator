@@ -2,7 +2,7 @@
 
 Bộ dữ liệu này được tạo tự động bởi `scripts/consolidate_dataset.py` từ các tệp dữ liệu phân mảnh trong `dataset_local/`.
 
-Toàn bộ thông tin về nhãn bệnh lý 5 tầng đĩa đệm, toạ độ không gian, phân chia 5-fold cross-validation và báo cáo chẩn đoán (Việt/Anh) đã được liên kết chuẩn xác qua khóa `patient_id`.
+Toàn bộ thông tin về nhãn bệnh lý 5 tầng đĩa đệm, toạ độ không gian, phân chia 5-fold cross-validation và báo cáo chẩn đoán (Việt/Anh) được nối qua khóa `patient_id`; độ đúng của nhãn, mapping tầng và nội dung báo cáo cần kiểm tra riêng. Xem [trạng thái triển khai](../docs/implementation_status.md).
 
 ---
 
@@ -10,9 +10,9 @@ Toàn bộ thông tin về nhãn bệnh lý 5 tầng đĩa đệm, toạ độ k
 
 ```text
 dataset/
-├── dataset_master.csv          # Bảng tổng hợp phẳng chi tiết theo từng tầng (1.235 dòng, 39 cột)
+├── dataset_master.csv          # Bảng tổng hợp phẳng chi tiết theo từng tầng (1.235 dòng, 42 cột)
 ├── dataset_patients.jsonl      # Dữ liệu phân tầng cấp bệnh nhân (247 dòng)
-├── sft_data/                   # Dữ liệu chuẩn Prompt-Response sẵn sàng cho Huấn luyện LoRA (Fold 1)
+├── sft_data/                   # Export legacy để truy vết; chưa duyệt cho V2 LoRA (Fold 1)
 │   ├── sft_fold1_train_vi.jsonl (142 mẫu tiếng Việt)
 │   ├── sft_fold1_val_vi.jsonl   (49 mẫu tiếng Việt)
 │   ├── sft_fold1_test_vi.jsonl  (47 mẫu tiếng Việt)
@@ -32,16 +32,16 @@ Mỗi dòng đại diện cho một tầng đĩa đệm cụ thể của bệnh 
 * **Phân tầng:** `level` (`L1/L2` ... `L5/S1`), `ivd_label` ($1 \to 5$).
 * **Nhãn bệnh lý lâm sàng:**
   * `pfirrmann_grade`: Phân độ thoái hóa ($1 \to 5$).
-  * `modic`: Thoái hóa Modic ($0$ hoặc $1$).
+  * `modic`: Biến đổi Modic type 0–3; không phải nhãn nhị phân hay thang severity.
   * `disc_herniation`: Thoát vị đĩa đệm ($0$ hoặc $1$).
   * `disc_bulging`: Phình đĩa đệm ($0$ hoặc $1$).
   * `disc_narrowing`: Hẹp khe đĩa đệm ($0$ hoặc $1$).
   * `spondylolisthesis`: Trượt đốt sống ($0$ hoặc $1$).
   * `up_endplate`, `low_endplate`: Tổn thương bản đệm trên/dưới.
 * **Toạ độ tâm đĩa (Localization):**
-  * `voxel_i`, `voxel_j`, `voxel_k`: Toạ độ voxel trên ảnh Sagittal T2.
+  * `voxel_i`, `voxel_j`, `voxel_k`: Toạ độ voxel trong file `volume` gốc; dùng đầy đủ affine khi đổi orientation, không coi `voxel_k` luôn là trục sagittal.
   * `x_lps`, `y_lps`, `z_lps`: Toạ độ không gian thực (LPS DICOM, đơn vị mm).
-  * `volume`, `spacing_i`, `spacing_j`, `spacing_k`: Kích thước và độ dày lát cắt ($4.4\text{ mm}$).
+  * `volume`, `spacing_i`, `spacing_j`, `spacing_k`: Tên volume và voxel spacing theo trục của file nguồn; không giả định cùng spacing cho mọi ảnh.
 * **Phân chia 5-Fold:** `fold1_split`, `fold2_split`, `fold3_split`, `fold4_split`, `fold5_split` (`train`, `val`, `test`).
 * **Văn bản báo cáo:**
   * `report_vi_technique` (alias `report_vi_kythuat`): Kỹ thuật xung chụp (tiếng Việt).
@@ -62,20 +62,21 @@ Mỗi dòng là một JSON độc lập biểu diễn một bệnh nhân hoàn c
       patients = [json.loads(line) for line in f]
   ```
 
-### C. Thư mục `sft_data/` (Sẵn sàng đưa vào Hugging Face SFTTrainer)
-Định dạng Prompt/Response chuẩn để tinh chỉnh MedGemma / Qwen2.5:
+### C. Thư mục `sft_data/` — legacy, chưa duyệt cho V2
+Giữ lại để truy vết và thực nghiệm đối chứng. Báo cáo gốc có thể chứa thông tin ngoài tám grading; không tự dùng toàn bộ làm ground truth cho V2 hướng A. Pipeline V2 train chỉ nhận target có review, scope và hash input hợp lệ.
+
+Ví dụ định dạng **hoàn toàn giả lập**:
+
 ```json
-{
-  "patient_id": "250002076",
-  "prompt": "[THÔNG TIN BỆNH NHÂN]: Tuổi: 46, Giới tính: F\n[KẾT QUẢ KHẢO SÁT 5 TẦNG ĐĨA ĐỆM CỘT SỐNG THẮT LƯNG]:\n- Tầng L1/L2: Thoái hóa Pfirrmann độ 2...\n[YÊU CẦU]: Dựa trên các phát hiện bệnh lý trên, hãy viết phần MÔ TẢ và KẾT LUẬN báo cáo cộng hưởng từ cột sống thắt lưng.",
-  "response": "[MÔ TẢ]:\n- Đường cong cột sống thắt lưng giảm.\n...\n[KẾT LUẬN]:\n- Thoái hóa đốt sống - đĩa đệm..."
-}
+{"patient_id": "synthetic-example", "prompt": "Ví dụ dữ kiện giả lập", "response": "Ví dụ câu trả lời giả lập"}
 ```
+
+Giá trị grading thiếu phải giữ `null`; JSON legacy cần được đối chiếu CSV bằng adapter trước khi dùng. Request suy luận V2 nằm riêng với reports và folds; xem `examples/report_request.synthetic.json`.
 
 ---
 
 ## 3. Cách chạy lại script tái tạo dữ liệu
 Nếu bạn muốn bổ sung logic hoặc cập nhật thêm trường dữ liệu, chỉ cần chạy:
 ```bash
-python scripts/consolidate_dataset.py
+python scripts/consolidate_dataset.py --source dataset_local --output output/derived/dataset
 ```

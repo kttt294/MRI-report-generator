@@ -49,7 +49,7 @@ wheels/
 # ==========================================
 checkpoints/
 weights/
-models/
+/models/
 output/
 outputs/
 wandb/
@@ -59,6 +59,18 @@ runs/
 *.bin
 *.safetensors
 *.onnx
+
+# Private derived data and credentials
+dataset/derived/
+kaggle_upload/
+dataset-metadata.json
+kaggle.json
+*.nii
+*.nii.gz
+*.dcm
+.env
+.env.*
+.pytest_cache/
 
 # ==========================================
 # Logs & Temporary Files

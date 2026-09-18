@@ -1,0 +1,245 @@
+{
+  "$defs": {
+    "Attempt": {
+      "additionalProperties": false,
+      "properties": {
+        "raw": {
+          "title": "Raw",
+          "type": "string"
+        },
+        "errors": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Errors",
+          "type": "array"
+        },
+        "truncated": {
+          "default": false,
+          "title": "Truncated",
+          "type": "boolean"
+        },
+        "input_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Input Tokens"
+        },
+        "output_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Output Tokens"
+        },
+        "elapsed_seconds": {
+          "default": 0.0,
+          "title": "Elapsed Seconds",
+          "type": "number"
+        }
+      },
+      "required": [
+        "raw",
+        "errors"
+      ],
+      "title": "Attempt",
+      "type": "object"
+    },
+    "ReportDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "findings": {
+          "items": {
+            "$ref": "#/$defs/Statement"
+          },
+          "maxItems": 40,
+          "minItems": 1,
+          "title": "Findings",
+          "type": "array"
+        },
+        "impression": {
+          "items": {
+            "$ref": "#/$defs/Statement"
+          },
+          "maxItems": 40,
+          "minItems": 1,
+          "title": "Impression",
+          "type": "array"
+        }
+      },
+      "required": [
+        "findings",
+        "impression"
+      ],
+      "title": "ReportDraft",
+      "type": "object"
+    },
+    "Statement": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 40,
+          "minItems": 1,
+          "title": "Evidence Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "evidence_ids"
+      ],
+      "title": "Statement",
+      "type": "object"
+    },
+    "ValidationResult": {
+      "additionalProperties": false,
+      "properties": {
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "checker": {
+          "const": "catalog-exact/1.0",
+          "default": "catalog-exact/1.0",
+          "title": "Checker",
+          "type": "string"
+        },
+        "errors": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Errors",
+          "type": "array"
+        }
+      },
+      "required": [
+        "passed",
+        "errors"
+      ],
+      "title": "ValidationResult",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "report-output/1.0",
+      "default": "report-output/1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "case_id": {
+      "title": "Case Id",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "ok",
+        "needs_review",
+        "fallback",
+        "failed"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "findings": {
+      "title": "Findings",
+      "type": "string"
+    },
+    "impression": {
+      "title": "Impression",
+      "type": "string"
+    },
+    "limitations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+    },
+    "validation": {
+      "$ref": "#/$defs/ValidationResult"
+    },
+    "draft": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ReportDraft"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "attempts": {
+      "items": {
+        "$ref": "#/$defs/Attempt"
+      },
+      "title": "Attempts",
+      "type": "array"
+    },
+    "generation_method": {
+      "enum": [
+        "template",
+        "llm",
+        "template_fallback",
+        "none"
+      ],
+      "title": "Generation Method",
+      "type": "string"
+    },
+    "input_sha256": {
+      "title": "Input Sha256",
+      "type": "string"
+    },
+    "model": {
+      "title": "Model",
+      "type": "string"
+    },
+    "prompt_sha256": {
+      "title": "Prompt Sha256",
+      "type": "string"
+    },
+    "elapsed_seconds": {
+      "title": "Elapsed Seconds",
+      "type": "number"
+    }
+  },
+  "required": [
+    "case_id",
+    "status",
+    "findings",
+    "impression",
+    "limitations",
+    "validation",
+    "draft",
+    "attempts",
+    "generation_method",
+    "input_sha256",
+    "model",
+    "prompt_sha256",
+    "elapsed_seconds"
+  ],
+  "title": "ReportResult",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

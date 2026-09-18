@@ -1,4 +1,6 @@
 # TÀI LIỆU CHUYỂN GIAO TOÀN DIỆN DỰ ÁN
+
+> Cập nhật code 18/09/2026: xem [trạng thái triển khai](implementation_status.md) và [hướng dẫn Kaggle](README_KAGGLE.md). Các phần mô tả calibration/vision trong tài liệu này là định hướng nghiên cứu, chưa phải chức năng đã nghiệm thu.
 ## Đề tài: "Sinh Báo Cáo MRI Cột Sống Thắt Lưng Theo Mức Có Hiệu Chuẩn Độ Bất Định"
 *(Calibrated Level-wise Lumbar Spine MRI Report Generation via Medical VLM & LoRA)*
 

@@ -1,0 +1,242 @@
+{
+  "schema_version": "report-input/1.0",
+  "ontology_version": "pspines-grading/1.0",
+  "scope": "lumbar_grading_8_fields",
+  "case_id": "synthetic-example-not-a-patient",
+  "provenance": {
+    "source": "synthetic_fixture",
+    "version": "example/1.0",
+    "source_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "quality": {
+    "level_mapping": "verified",
+    "ontology_review": "verified"
+  },
+  "levels": [
+    {
+      "level": "L1/L2",
+      "gradings": {
+        "pfirrmann_grade": {
+          "value": 1,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "modic": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "disc_herniation": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "disc_bulging": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "disc_narrowing": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "spondylolisthesis": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "up_endplate": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "low_endplate": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        }
+      }
+    },
+    {
+      "level": "L2/L3",
+      "gradings": {
+        "pfirrmann_grade": {
+          "value": 1,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "modic": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "disc_herniation": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "disc_bulging": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "disc_narrowing": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "spondylolisthesis": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "up_endplate": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "low_endplate": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        }
+      }
+    },
+    {
+      "level": "L3/L4",
+      "gradings": {
+        "pfirrmann_grade": {
+          "value": 1,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "modic": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "disc_herniation": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "disc_bulging": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "disc_narrowing": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "spondylolisthesis": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "up_endplate": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "low_endplate": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        }
+      }
+    },
+    {
+      "level": "L4/L5",
+      "gradings": {
+        "pfirrmann_grade": {
+          "value": 1,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "modic": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "disc_herniation": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "disc_bulging": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "disc_narrowing": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "spondylolisthesis": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "up_endplate": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "low_endplate": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        }
+      }
+    },
+    {
+      "level": "L5/S1",
+      "gradings": {
+        "pfirrmann_grade": {
+          "value": 1,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "modic": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "disc_herniation": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "disc_bulging": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "disc_narrowing": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "spondylolisthesis": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "up_endplate": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        },
+        "low_endplate": {
+          "value": 0,
+          "status": "observed",
+          "uncertainty": null
+        }
+      }
+    }
+  ]
+}

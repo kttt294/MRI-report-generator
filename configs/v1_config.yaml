@@ -3,11 +3,15 @@
 # ==========================================================
 
 # Mô hình nền tảng VLM
-# Khuyên dùng Qwen2.5-VL-3B-Instruct (chạy siêu mượt trên Colab T4 16GB VRAM, tiếng Việt rất giỏi)
+# QLoRA baseline; GPU memory and Vietnamese quality require measurement.
 # Có thể đổi thành Qwen/Qwen2.5-VL-7B-Instruct nếu chạy Colab Pro / A100
 model:
   name_or_path: "Qwen/Qwen2.5-VL-3B-Instruct"
-  torch_dtype: "bfloat16"
+  revision: null                   # Resolved model commit is saved in run_manifest
+  torch_dtype: "auto"             # T4: FP16; BF16 only on supported GPUs
+  require_cuda: true
+  max_pixels: 401408              # 512 * 28 * 28
+  min_pixels: 200704              # 256 * 28 * 28
   use_4bit_quantization: true       # Bật QLoRA 4-bit để tiết kiệm tối đa VRAM
 
 # Cấu hình LoRA (PEFT)
@@ -32,6 +36,10 @@ data:
   language: "vi"                    # "vi" (tiếng Việt) hoặc "en" (tiếng Anh)
   fold: 1                           # Sử dụng Fold 1 làm tập chia chuẩn
   image_size: [384, 384]            # Kích thước ảnh 2D chuẩn hóa
+  slice_selection: middle          # No grading/localization labels used to select images
+  slice_offsets: [0]               # Try [-1, 0, 1] as a separate multi-view ablation
+  max_sequence_length: 4096        # Fail on overflow, never silently truncate
+  require_both_sections: true
 
 # Siêu tham số huấn luyện (Training Hyperparameters)
 training:
@@ -47,6 +55,7 @@ training:
   eval_steps: 25
   evaluation_strategy: "steps"
   save_total_limit: 2
-  fp16: false
-  bf16: true                        # T4/A100 hỗ trợ bf16 tốt
   seed: 42
+
+generation:
+  max_new_tokens: 768
