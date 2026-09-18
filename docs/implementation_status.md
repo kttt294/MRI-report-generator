@@ -35,6 +35,15 @@ Nhật ký/receipts riêng tư được lưu dưới `output/implementation_fina
 
 Chạy lệnh từ thư mục gốc repo. Trên Kaggle dùng notebook và [README từng bước](README_KAGGLE.md); phần này dành cho CLI.
 
+Máy Windows local của chủ dự án **không có GPU**. Môi trường `.venv` đã được chuẩn bị để kiểm thử CPU; dùng đúng interpreter này thay vì Python hệ thống:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe -m src.generate_report --input examples/report_request.synthetic.json --output output/demo/report.jsonl
+```
+
+Lỗi Windows `Entry Point Not Found` tại `torchvision/_C.pyd` là dấu hiệu thư viện nhị phân torch/torchvision không khớp, không chứng minh máy thiếu GPU. Trong lần kiểm tra local đã phát hiện torchvision hệ thống 0.20.1 không khớp torch 2.10.0; `.venv` dùng torchvision CPU 0.25.0 tương thích, không sửa installation hệ thống. Train Qwen được dành cho Kaggle; kiểm thử mô hình nhỏ và template chạy CPU.
+
 ### V2 template độc lập
 
 ```bash
