@@ -20,10 +20,10 @@ Cập nhật 18/09/2026. Nhánh: `codex/kaggle-v1-v2`. Đây là bản code đã
 
 ## Bằng chứng đã chạy local
 
-- **33 tests tự động đã pass** (18/09/2026), kiểm schema/missing/aliases/split, affine phantom, prompt masking với pad bằng EOS, lỗi backend/repair/fallback, checkpoint/time budget, review gate, ETL không sửa nguồn, notebook sạch và evaluation. Không dùng dữ liệu bệnh nhân trong tests.
+- **33 tests tự động đã pass** (18/09/2026). Đây là test phần mềm dùng fixture giả lập và một mô hình ngôn ngữ cực nhỏ trên CPU; không phải 33 ca MRI và không phải kết quả chẩn đoán.
 - Tiny GPT-2 + LoRA trên CPU: dừng ở step 2, lưu đầy đủ, nạp lại đến step 4; trọng số LoRA khớp run liên tục trong tolerance. Reload adapter có loss hữu hạn. Đây không phải Qwen GPU smoke test.
 - ETL chạy dữ liệu local: 1.235 dòng, 42 cột, 247 ca. JSON derived giữ ô grading thiếu là null. Adapter cho JSON legacy phục hồi đúng một ô đã bị đổi thành zero. Hash JSON nguồn không đổi.
-- Cloud orchestrator V2 template chạy local qua đường chuẩn bị dữ liệu đến receipt: 247/247 outputs; tất cả `needs_review` do mapping/ontology nguồn chưa xác nhận, không phải do lỗi thực thi.
+- Cloud orchestrator V2 template chạy local qua đường chuẩn bị dữ liệu đến receipt: 247/247 bản ghi bệnh nhân trong bảng local được chuyển thành output template; không đọc NIfTI, không gọi VLM/LLM và không dùng GPU. Tất cả `needs_review` do mapping/ontology nguồn chưa xác nhận, không phải do lỗi thực thi.
 - R0 trên validation fold 1: 50 ca annotation; không có lỗi format/catalog. Không suy ra tỷ lệ sai lâm sàng bằng 0. V1 có 46 ca validation đủ hai section; dùng `--matched-v1-cohort` khi cần cùng cohort.
 - Processor Qwen2.5-VL thật, ảnh phantom và 230 target local: 137 train / 46 val / 47 test; tối đa 974 token, ít nhất 174 token target, mask đúng. Chỉ dùng ảnh giả cho kiểm tra này.
 - Tokenizer Qwen2.5 3B thật với 247 input/target controlled V2: tối đa 2.659 prompt tokens, 2.170 target tokens, 4.831 full tokens; không vượt cấu hình 8.192. Đây là độ dài template, không đảm bảo LLM luôn dừng trước giới hạn.

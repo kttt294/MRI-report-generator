@@ -28,7 +28,7 @@ python -m pytest -q
 python scripts/check_environment.py
 ```
 
-Giữ cặp torch/torchvision CUDA do Kaggle cung cấp; cài `requirements-kaggle.txt`. Bộ test dùng dữ liệu giả lập, không tải model hay dữ liệu bệnh nhân. Kiểm thử CPU và template đã thực hiện; GPU Kaggle, ảnh thật, chất lượng LLM và đánh giá bác sĩ vẫn cần nghiệm thu. Xem bằng chứng cụ thể trong tài liệu trạng thái.
+Giữ cặp torch/torchvision CUDA do Kaggle cung cấp; cài `requirements-kaggle.txt`. **33 test** là test hành vi của code, dùng fixture giả lập và mô hình rất nhỏ trên CPU; không phải 33 ca MRI. **247 ca V2** là 247 bản ghi grading local được chạy qua template deterministic trên CPU; không đọc NIfTI, không gọi VLM/LLM và không phải kết quả chẩn đoán đã được bác sĩ đánh giá. Kiểm thử CPU và template đã thực hiện; GPU Kaggle, ảnh thật, train V1, chất lượng LLM và đánh giá bác sĩ vẫn cần nghiệm thu. Xem bằng chứng cụ thể trong tài liệu trạng thái.
 
 ## Dữ liệu và nghiên cứu
 
