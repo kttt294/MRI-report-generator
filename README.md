@@ -7,6 +7,8 @@ Dự án nghiên cứu sinh báo cáo MRI cột sống thắt lưng tiếng Vi�
 
 Bắt đầu với [hướng dẫn Kaggle cho người mới](docs/README_KAGGLE.md), [trạng thái và lệnh chạy](docs/implementation_status.md), [implementation plan](docs/implementation_plan_v1_v2_report.md).
 
+Tổng quan dữ liệu và đánh giá chất lượng: [data overview report](docs/data_overview_report_2026-09-18.md), kèm [notebook tái lập](notebooks/Data_Overview_Audit.ipynb).
+
 ## Notebook Kaggle
 
 - [V1 training / resume / inference](notebooks/Kaggle_V1_Training.ipynb)
