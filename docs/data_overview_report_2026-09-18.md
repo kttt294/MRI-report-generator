@@ -1,7 +1,7 @@
 # Báo cáo tổng quan và chất lượng dữ liệu PSPINES
 
-Ngày lập: 18/09/2026  
-Phạm vi: working tree local của `healcare_a2i`; báo cáo này không đọc Google Drive/Kaggle và không có NIfTI trong repo.  
+Ngày lập: 18/09/2026
+Phạm vi: working tree local của `healcare_a2i`; báo cáo này không đọc Google Drive/Kaggle và không có NIfTI trong repo.
 Notebook tái lập: [`notebooks/Data_Overview_Audit.ipynb`](../notebooks/Data_Overview_Audit.ipynb)
 
 ## Tóm tắt điều hành
@@ -21,16 +21,16 @@ Kết luận sử dụng: dữ liệu **đủ để chạy ETL, kiểm thử ph�
 
 Nguồn được đối chiếu:
 
-| Nguồn | Vai trò |
-|---|---|
-| `dataset/dataset_master.csv` | Bảng dẫn xuất 1.235 dòng, dùng cho profile và V1 metadata |
-| `dataset/dataset_patients.jsonl` | Record cấp bệnh nhân, 247 dòng, dùng adapter V2 |
-| `dataset_local/grading/` | Grading nguồn theo tầng |
-| `dataset_local/localize/` | Tọa độ và volume nguồn |
-| `dataset_local/folds/` | Chia train/val/test theo bệnh nhân |
-| `dataset_local/reports_json/` | Báo cáo Việt và metadata |
-| `dataset_local/reports_text/` | Báo cáo tiếng Anh được ETL đọc hiện tại |
-| `output/annotation_audit/` | Kết quả audit đối chiếu grading–văn bản trước đó |
+| Nguồn                             | Vai trò                                                        |
+| ---------------------------------- | --------------------------------------------------------------- |
+| `dataset/dataset_master.csv`     | Bảng dẫn xuất 1.235 dòng, dùng cho profile và V1 metadata |
+| `dataset/dataset_patients.jsonl` | Record cấp bệnh nhân, 247 dòng, dùng adapter V2            |
+| `dataset_local/grading/`         | Grading nguồn theo tầng                                       |
+| `dataset_local/localize/`        | Tọa độ và volume nguồn                                     |
+| `dataset_local/folds/`           | Chia train/val/test theo bệnh nhân                            |
+| `dataset_local/reports_json/`    | Báo cáo Việt và metadata                                    |
+| `dataset_local/reports_text/`    | Báo cáo tiếng Anh được ETL đọc hiện tại               |
+| `output/annotation_audit/`       | Kết quả audit đối chiếu grading–văn bản trước đó    |
 
 Khóa hợp lý là `(patient_id, level)`. Kiểm tra hiện tại cho thấy không có duplicate ở khóa này và mỗi bệnh nhân có đúng năm level: `L1/L2`, `L2/L3`, `L3/L4`, `L4/L5`, `L5/S1`. Có 247 volume khác nhau trong master; điều này mới xác nhận metadata volume, chưa xác nhận file NIfTI tồn tại vì ảnh không có trong working tree.
 
@@ -38,17 +38,17 @@ ETL tạo dữ liệu dẫn xuất từ `dataset_local` sang một thư mục đ
 
 ## 2. Quy mô và chia tập
 
-| Hạng mục | Số lượng |
-|---|---:|
-| Bệnh nhân | 247 |
-| Dòng patient–level | 1.235 |
-| Mỗi level | 247 |
-| Volume được tham chiếu | 247 |
-| Cả findings Việt | 230 |
-| Findings Việt, kể cả ca thiếu impression | 238 |
-| Impression Việt | 230 |
-| Báo cáo tiếng Anh | 236 |
-| Kỹ thuật chụp Việt | 228 |
+| Hạng mục                                   | Số lượng |
+| -------------------------------------------- | ----------: |
+| Bệnh nhân                                  |         247 |
+| Dòng patient–level                         |       1.235 |
+| Mỗi level                                   |         247 |
+| Volume được tham chiếu                   |         247 |
+| Cả findings Việt                           |         230 |
+| Findings Việt, kể cả ca thiếu impression |         238 |
+| Impression Việt                             |         230 |
+| Báo cáo tiếng Anh                         |         236 |
+| Kỹ thuật chụp Việt                       |         228 |
 
 Chia Fold 1 ở grain bệnh nhân là **147 train / 50 val / 50 test**. Các fold còn lại lần lượt là 147/50/50, 148/50/49, 148/50/49 và 148/50/49. Trong pipeline V1, điều kiện có đủ hai section Việt loại còn 137 train / 46 val / 47 test; đây là số ca đủ target, không phải số ca đã được bác sĩ adjudicate.
 
@@ -60,29 +60,29 @@ Master hiện có 42 cột, gồm grading, localization, fold, metadata và repo
 
 Missingness quan sát được ở master:
 
-| Trường | Thiếu theo dòng | Diễn giải |
-|---|---:|---|
-| `disc_bulging` | 1/1.235 | Missing grading thật; phải là `null`, không phải âm tính |
-| `sub_id`, `sex`, `age_at_scan`, `birth_year`, `study_date` | 45/1.235 mỗi trường | Thiếu theo ca bệnh nhân, lặp lại trên 5 dòng |
-| `report_vi_findings` | 45/1.235 | Tương ứng 9 bệnh nhân thiếu findings |
-| `report_vi_impression` | 85/1.235 | Tương ứng 17 bệnh nhân thiếu impression |
-| `report_en` | 55/1.235 | Tương ứng 11 bệnh nhân thiếu tiếng Anh |
-| `report_vi_technique` | 95/1.235 | Không nên dùng làm input vision nếu chưa xác minh acquisition metadata |
+| Trường                                                             | Thiếu theo dòng | Diễn giải                                                                   |
+| -------------------------------------------------------------------- | ----------------: | ----------------------------------------------------------------------------- |
+| `disc_bulging`                                                     |           1/1.235 | Missing grading thật;`null`, không phải âm tính                        |
+| `sub_id`, `sex`, `age_at_scan`, `birth_year`, `study_date` |             9/247 | Thiếu theo ca bệnh nhân, lặp lại trên 5 dòng -> 45 dòng thiếu        |
+| `report_vi_findings`                                               |             9/247 | Tương ứng 9 bệnh nhân thiếu findings                                    |
+| `report_vi_impression`                                             |            17/247 | Tương ứng 17 bệnh nhân thiếu impression                                 |
+| `report_en`                                                        |            11/247 | Tương ứng 11 bệnh nhân thiếu tiếng Anh                                 |
+| `report_vi_technique`                                              |          95/1.235 | Không nên dùng làm input vision nếu chưa xác minh acquisition metadata |
 
 Các alias report mới/cũ phải đồng nhất. Adapter sẽ báo lỗi nếu canonical và alias cùng có giá trị nhưng khác nhau. Giá trị `null`, chuỗi rỗng, `nan`, `none` và `null` không được suy ra thành `0`.
 
 ## 4. Phân bố tám trường grading
 
-| Trường | Phân bố quan sát |
-|---|---|
-| `pfirrmann_grade` | 1: 36; 2: 689; 3: 418; 4: 88; 5: 4 |
-| `modic` | 0: 1.058; 1: 24; 2: 149; 3: 4 |
-| `disc_herniation` | 0: 1.147; 1: 88 |
-| `disc_bulging` | 0: 906; 1: 328; 1 missing |
-| `disc_narrowing` | 0: 1.176; 1: 59 |
-| `spondylolisthesis` | 0: 1.194; 1: 41 |
-| `up_endplate` | 0: 1.120; 1: 115 |
-| `low_endplate` | 0: 1.163; 1: 72 |
+| Trường              | Phân bố quan sát                |
+| --------------------- | ---------------------------------- |
+| `pfirrmann_grade`   | 1: 36; 2: 689; 3: 418; 4: 88; 5: 4 |
+| `modic`             | 0: 1.058; 1: 24; 2: 149; 3: 4      |
+| `disc_herniation`   | 0: 1.147; 1: 88                    |
+| `disc_bulging`      | 0: 906; 1: 328; 1 missing          |
+| `disc_narrowing`    | 0: 1.176; 1: 59                    |
+| `spondylolisthesis` | 0: 1.194; 1: 41                    |
+| `up_endplate`       | 0: 1.120; 1: 115                   |
+| `low_endplate`      | 0: 1.163; 1: 72                    |
 
 Mất cân bằng lớp là rõ ràng: Pfirrmann 5 có 4/1.235 tầng; Modic 3 có 4; spondylolisthesis dương 41; disc narrowing dương 59. Accuracy tổng thể sẽ gây hiểu nhầm. V1/Vision cần báo cáo sensitivity/recall theo nhãn, patient-level split và khoảng tin cậy; V2 report engine không nên biến các nhãn này thành severity mới.
 
@@ -92,14 +92,14 @@ Tài liệu cũ từng mô tả Modic là nhị phân; dữ liệu thực tế c
 
 Audit hiện có cho thấy các mức độ khác biệt sau:
 
-| Chỉ báo | Số lượng |
-|---|---:|
-| Bệnh nhân có ít nhất một conflict | 131/247 |
-| Conflict không phải chỉ khác chiều cao/kích thước | 86/247 |
-| Conflict “absence” rộng cần xem lại | 21/247 |
-| Ưu tiên A: lỗi bệnh nhân hoặc mâu thuẫn nội bộ | 43 |
-| Ưu tiên B: khác mapping/định nghĩa/diễn đạt | 112 |
-| Ưu tiên C: chưa có cờ xung đột | 83 |
+| Chỉ báo                                                 | Số lượng |
+| --------------------------------------------------------- | ----------: |
+| Bệnh nhân có ít nhất một conflict                   |     131/247 |
+| Conflict không phải chỉ khác chiều cao/kích thước |      86/247 |
+| Conflict “absence” rộng cần xem lại                  |      21/247 |
+| Ưu tiên A: lỗi bệnh nhân hoặc mâu thuẫn nội bộ  |          43 |
+| Ưu tiên B: khác mapping/định nghĩa/diễn đạt      |         112 |
+| Ưu tiên C: chưa có cờ xung đột                     |          83 |
 
 ### Ý nghĩa của A và B
 
@@ -141,14 +141,14 @@ Nó chưa phù hợp làm target V2 mặc định vì report chứa nhiều thô
 
 ## 8. Đánh giá mức sẵn sàng theo mục tiêu
 
-| Mục tiêu | Mức sẵn sàng | Điều kiện còn thiếu |
-|---|---|---|
-| ETL và adapter giữ missingness | Sẵn sàng kiểm thử | Tiếp tục hash nguồn và kiểm tra mỗi bản dữ liệu mới |
-| V2 template từ JSON grading | Sẵn sàng làm baseline | Xác nhận mapping/ontology trước khi bỏ `needs_review` |
-| V2 LLM prompt-only | Có khung chạy | Cần benchmark R1–R4 và bác sĩ đánh giá mù |
-| V2 LoRA | Chưa sẵn sàng nghiên cứu chính | Cần target human-reviewed, hash-bound, đủ train/val |
-| V1 vision → report | Chưa nghiệm thu | Cần NIfTI thật, smoke GPU Kaggle, orientation review, checkpoint/resume |
-| Clinical accuracy | Chưa thể kết luận | Cần reference/adjudication độc lập và protocol khóa trước test |
+| Mục tiêu                       | Mức sẵn sàng                      | Điều kiện còn thiếu                                                  |
+| -------------------------------- | ------------------------------------ | ------------------------------------------------------------------------- |
+| ETL và adapter giữ missingness | Sẵn sàng kiểm thử                | Tiếp tục hash nguồn và kiểm tra mỗi bản dữ liệu mới             |
+| V2 template từ JSON grading     | Sẵn sàng làm baseline             | Xác nhận mapping/ontology trước khi bỏ`needs_review`               |
+| V2 LLM prompt-only               | Có khung chạy                      | Cần benchmark R1–R4 và bác sĩ đánh giá mù                        |
+| V2 LoRA                          | Chưa sẵn sàng nghiên cứu chính | Cần target human-reviewed, hash-bound, đủ train/val                    |
+| V1 vision → report              | Chưa nghiệm thu                    | Cần NIfTI thật, smoke GPU Kaggle, orientation review, checkpoint/resume |
+| Clinical accuracy                | Chưa thể kết luận                | Cần reference/adjudication độc lập và protocol khóa trước test    |
 
 ## 9. Quyết định và kiểm tra tiếp theo
 
