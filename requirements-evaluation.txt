@@ -1,0 +1,5 @@
+# Text metrics for controlled V2 report evaluation. Install only in the
+# evaluation runtime; training does not require these packages.
+sacrebleu==2.5.1
+rouge-score==0.1.2
+bert-score==0.3.13
