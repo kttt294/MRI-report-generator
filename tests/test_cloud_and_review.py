@@ -10,13 +10,13 @@ from src.report.experiments import ablate, summarize, wilson
 from src.report.backends.base import Completion
 from src.data.v2_dataset import load_reviewed_targets
 from scripts.cloud_prepare import prepare
-from scripts.make_cloud_notebooks import notebook
 from scripts.summarize_review import summarize as summarize_review
 
 
 def test_notebooks_thin_clear_and_valid():
-    for task in ("v1-train", "v2-generate", "v2-train"):
-        nb = notebook(task)
+    notebooks = Path(__file__).resolve().parents[1] / "notebooks"
+    for name in ("Kaggle_V1_Training.ipynb", "Kaggle_V2_Report.ipynb", "Kaggle_V2_Training.ipynb"):
+        nb = nbformat.read(notebooks / name, as_version=4)
         nbformat.validate(nb)
         for cell in nb.cells:
             if cell.cell_type == "code":
@@ -92,7 +92,8 @@ def test_unreviewed_not_counted_as_zero(tmp_path):
     assert result["metrics"]["clinical_error"]["unreviewed"] == 1
 
 
-def test_raw_etl_missing_preserved_source_untouched(tmp_path):
+@pytest.mark.parametrize("legacy_report_keys", [False, True])
+def test_raw_etl_missing_preserved_source_untouched(tmp_path, legacy_report_keys):
     source, output = tmp_path / "input", tmp_path / "derived"
     def csv_file(relative, rows):
         path = source / relative
@@ -109,11 +110,20 @@ def test_raw_etl_missing_preserved_source_untouched(tmp_path):
         "i": 1, "j": 1, "k": 1, "x_lps": 1, "y_lps": 1, "z_lps": 1, "volume": "synthetic.nii.gz",
         "spacing_i": 1, "spacing_j": 1, "spacing_k": 1, "source": "synthetic", "qc_status": "test"} for level in LEVELS])
     for i in range(1, 6): csv_file(f"folds/fold{i}/train.csv", [{"Patient ID": "001"}])
-    write_json(source / "reports_json/report/001.json", {"patient_id": "001", "findings": "Synthetic findings",
-        "impression": "Synthetic impression", "technique": "Synthetic technique"})
+    report = {"patient_id": "001", "findings": "Synthetic findings",
+        "impression": "Synthetic impression", "technique": "Synthetic technique"}
+    if legacy_report_keys:
+        for canonical, alias in [("findings", "mo_ta"), ("impression", "ket_luan"), ("technique", "ky_thuat")]:
+            report[alias] = report.pop(canonical)
+    write_json(source / "reports_json/report/001.json", report)
     hashes = {str(p): file_hash(p) for p in source.rglob("*") if p.is_file()}
     receipt = prepare(source, output)
     assert receipt["requests"] == 1
+    patient = strict_loads((output / "dataset/dataset_patients.jsonl").read_text(encoding="utf-8"))
+    assert patient["reports"]["vi"] == {"technique": "Synthetic technique",
+        "findings": ["Synthetic findings"], "impression": ["Synthetic impression"]}
+    assert not (output / "dataset/data_of_1patient.json").exists()
+    assert not (output / "dataset/sft_data").exists()
     req = strict_loads((output / "v2/requests.jsonl").read_text())
     assert req["case_id"] == "001" and req["levels"][3]["gradings"]["disc_bulging"]["value"] is None
     assert {str(p): file_hash(p) for p in source.rglob("*") if p.is_file()} == hashes

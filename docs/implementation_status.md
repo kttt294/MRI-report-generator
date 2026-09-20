@@ -20,6 +20,8 @@ Cập nhật 18/09/2026. Nhánh: `codex/kaggle-v1-v2`. Đây là bản code đã
 
 ## Bằng chứng đã chạy local
 
+- **20/09/2026, sau dọn repo:** 34 tests pass trên CPU. ETL tái tạo đúng hai file chính với 1.235 dòng/247 ca; adapter tạo 247 request V2; audit nguồn → CSV → JSONL không có sai khác trong các phép so sánh trường được xuất. EDA chạy lại tạo 19 bảng, không còn bảng SFT legacy. Kết quả riêng tư nằm trong `output/cleanup_verify/`. Đây là kiểm tra pipeline dữ liệu/phần mềm, chưa phải huấn luyện hoặc đánh giá lâm sàng trên GPU.
+
 - **33 tests tự động đã pass** (18/09/2026). Đây là test phần mềm dùng fixture giả lập và một mô hình ngôn ngữ cực nhỏ trên CPU; không phải 33 ca MRI và không phải kết quả chẩn đoán.
 - Tiny GPT-2 + LoRA trên CPU: dừng ở step 2, lưu đầy đủ, nạp lại đến step 4; trọng số LoRA khớp run liên tục trong tolerance. Reload adapter có loss hữu hạn. Đây không phải Qwen GPU smoke test.
 - ETL chạy dữ liệu local: 1.235 dòng, 42 cột, 247 ca. JSON derived giữ ô grading thiếu là null. Adapter cho JSON legacy phục hồi đúng một ô đã bị đổi thành zero. Hash JSON nguồn không đổi.
@@ -29,7 +31,7 @@ Cập nhật 18/09/2026. Nhánh: `codex/kaggle-v1-v2`. Đây là bản code đã
 - Tokenizer Qwen2.5 3B thật với 247 input/target controlled V2: tối đa 2.659 prompt tokens, 2.170 target tokens, 4.831 full tokens; không vượt cấu hình 8.192. Đây là độ dài template, không đảm bảo LLM luôn dừng trước giới hạn.
 - LM Format Enforcer khởi tạo được schema constraints với tokenizer Qwen; chưa đo R2 generation trên model weights thật.
 
-Nhật ký/receipts riêng tư được lưu dưới `output/implementation_final`, `output/implementation_check`, `output/cloud_acceptance`; không commit lên public GitHub. Môi trường local: Python 3.12, PyTorch CPU 2.10.0, torchvision CPU 0.25.0; các version khác xem requirements/receipts. Kaggle giữ torch/torchvision CUDA được cài sẵn và kiểm tra lại bằng `check_environment.py`.
+Nhật ký/receipts riêng tư của lần kiểm thử 18/09 đã chuyển sang bản phục hồi ngoài repo khi dọn dẹp; trước đó nằm dưới `output/implementation_final`, `output/implementation_check`, `output/cloud_acceptance`; không commit lên public GitHub. Môi trường local: Python 3.12, PyTorch CPU 2.10.0, torchvision CPU 0.25.0; các version khác xem requirements/receipts. Kaggle giữ torch/torchvision CUDA được cài sẵn và kiểm tra lại bằng `check_environment.py`.
 
 ## Chạy nhanh
 

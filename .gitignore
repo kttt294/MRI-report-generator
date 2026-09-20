@@ -3,11 +3,7 @@
 # Tuân thủ bảo mật dữ liệu y tế PSPINES
 # ==========================================
 dataset_local/
-dataset/*.csv
-dataset/*.jsonl
-dataset/*.json
-dataset/sft_data/
-dataset/v1_cache_images/
+dataset/*
 !dataset/README.md
 
 # Large Reference Documents & Papers
@@ -93,3 +89,7 @@ temp/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Private local reports and notebook configuration
+reports/
+.jupyter-config/

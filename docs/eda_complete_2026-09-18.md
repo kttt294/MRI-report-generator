@@ -1,5 +1,7 @@
 # EDA toàn bộ bảng dữ liệu hiện có
 
+> Báo cáo lịch sử trước đợt dọn repo 20/09/2026. Các tham chiếu SFT/file mẫu/output cũ mô tả lần kiểm tra đó; các file này đã được chuyển ra bản phục hồi. ETL hiện chỉ xuất CSV và JSONL; JSONL dùng key VI canonical và giữ nhãn thiếu là null.
+
 Tạo tự động: 2026-09-18T10:49:54.888712+00:00
 
 Các số liệu dưới đây được tính bằng code trên toàn bộ dữ liệu local, không phải đọc từng dòng rồi ước lượng. Diễn giải dựa trên schema và quy tắc audit. Không có GPU hay model được chạy.

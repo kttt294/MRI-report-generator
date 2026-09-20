@@ -33,7 +33,7 @@ Một số từ bạn sẽ gặp:
 - **Version:** một phiên bản đã lưu của Dataset hoặc Notebook.
 - **Slug:** tên ngắn nằm trong URL, ví dụ `lumbar-mri-images`.
 
-Trước khi upload, bảo đảm việc dùng Kaggle nằm trong quyền sử dụng dữ liệu của nhóm. [README nguồn](../dataset/README_dataset.md) hiện có điều khoản không nạp dịch vụ bên thứ ba; lựa chọn Private không tự thay thế quyền sử dụng đó. Hướng dẫn này không tự upload file của bạn.
+Trước khi upload, bảo đảm việc dùng Kaggle nằm trong quyền sử dụng dữ liệu của nhóm. README đi kèm dữ liệu nguồn hiện có điều khoản không nạp dịch vụ bên thứ ba; lựa chọn Private không tự thay thế quyền sử dụng đó. Hướng dẫn này không tự upload file của bạn.
 
 ## 2. Chuẩn bị hai bộ dữ liệu riêng
 
@@ -65,7 +65,7 @@ reports_json/     # Giữ cả report/ và metadata/
 README.md         # Điều kiện sử dụng và mô tả nguồn
 ```
 
-`reports_text/` có thể thêm nếu cần tái lập export tiếng Anh legacy. `reports_text_v1_reference/` chưa cần cho hướng A. Không chỉ upload mẫu `data_of_1patient.json`: đó không phải toàn bộ cohort.
+`reports_text/` có thể thêm nếu cần tái lập export tiếng Anh legacy. `reports_text_v1_reference/` chưa cần cho hướng A. Upload toàn bộ annotations của cohort, không dùng JSON của một bệnh nhân thay cho bộ dữ liệu.
 
 Không tự sửa nhãn thiếu thành 0. Code sẽ đọc nguồn và giữ missingness. Dữ liệu hợp nhất trong `dataset/` sẽ được script tạo vào thư mục ghi được, không ghi đè hai bộ nguồn này.
 

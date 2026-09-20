@@ -227,7 +227,7 @@ def build(root: Path, output: Path):
 
     inventory = []
     paths = [source, json_path, root / "scripts/audit_annotation_consistency.py", Path(__file__).resolve()]
-    for directory in ["dataset_local/grading", "dataset_local/localize", "dataset_local/folds", "dataset_local/reports_json", "dataset_local/reports_text", "dataset_local/reports_text_v1_reference", "dataset/sft_data", "dataset_local/nifti", "dataset_local/dicom"]:
+    for directory in ["dataset_local/grading", "dataset_local/localize", "dataset_local/folds", "dataset_local/reports_json", "dataset_local/reports_text", "dataset_local/reports_text_v1_reference", "dataset_local/nifti", "dataset_local/dicom"]:
         folder = root / directory
         files = sorted(x for x in folder.rglob("*") if x.is_file()) if folder.exists() else []
         inventory.append([directory, "Có" if folder.exists() else "Không có local", len(files), sum(x.stat().st_size for x in files)])
@@ -243,12 +243,6 @@ def build(root: Path, output: Path):
     table("Nguon va pham vi", "Danh mục nguồn local", ["Thư mục", "Hiện diện", "Số file", "Bytes", "SHA256 tập file"], inventory,
           "Đếm file gồm cả README. Hash tập file = SHA256 chuỗi tên tương đối + SHA256 nội dung từng file theo thứ tự; không công khai tên file bệnh nhân.")
     table("Nguon va pham vi", "Dấu vân tay đầu vào và code", ["Nguồn", "Bytes", "SHA256"], [[str(x.relative_to(root)).replace("\\", "/"), x.stat().st_size, hashlib.sha256(x.read_bytes()).hexdigest()] for x in paths])
-    sft = []
-    for path in sorted((root / "dataset/sft_data").glob("*.jsonl")):
-        data = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
-        sft.append([path.name, len(data), "bản ghi SFT; không mặc định là số BN duy nhất"])
-    table("Nguon va pham vi", "Các file SFT legacy", ["File", "Số bản ghi", "Đơn vị / lưu ý"], sft,
-          "EDA kiểm số dòng JSON hợp lệ; không suy ra tập này là đầu vào chuẩn V2 hoặc đủ findings + impression.")
 
     # Reconciliation guards catch denominator/grain mistakes before export.
     assert sum(x[1] for x in audit["review_queue"].items()) == paired_n

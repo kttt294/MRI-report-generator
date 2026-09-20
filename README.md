@@ -5,9 +5,9 @@ Dự án nghiên cứu sinh báo cáo MRI cột sống thắt lưng tiếng Vi�
 - **V1:** ảnh NIfTI → các lát sagittal chọn bằng quy tắc → Qwen2.5-VL + QLoRA → findings và impression. Mặc định một lát giữa; có thể cấu hình nhiều lát như một ablation riêng.
 - **V2, hướng A:** JSON gồm tám nhãn grading của năm tầng → report engine. Hiện dùng annotation thay đầu ra vision; vision engine và calibration chưa được xây dựng.
 
-Bắt đầu với [hướng dẫn Kaggle cho người mới](docs/README_KAGGLE.md), [trạng thái và lệnh chạy](docs/implementation_status.md), [implementation plan](docs/implementation_plan_v1_v2_report.md).
+Bắt đầu với [hướng dẫn Kaggle cho người mới](docs/README_KAGGLE.md) và [trạng thái, lệnh chạy](docs/implementation_status.md).
 
-Tổng quan dữ liệu và đánh giá chất lượng: [data overview report](docs/data_overview_report_2026-09-18.md), kèm [notebook tái lập](notebooks/Data_Overview_Audit.ipynb).
+Chất lượng dữ liệu: [EDA đầy đủ](docs/eda_complete_2026-09-18.md) và [kiểm tra gộp dữ liệu](docs/dataset_merge_audit_2026-09-19.md). Tái lập bằng `scripts/build_complete_eda.py` và `scripts/audit_dataset_merge.py`.
 
 ## Notebook Kaggle
 
@@ -34,6 +34,23 @@ Giữ cặp torch/torchvision CUDA do Kaggle cung cấp; cài `requirements-kagg
 
 ## Dữ liệu và nghiên cứu
 
-SFT legacy được giữ để truy vết/thí nghiệm, không được coi là target đầy đủ phù hợp cho V2 chỉ có tám nhãn. Target V2 phải có review và liên kết đúng hash input. Các báo cáo đầy đủ của bác sĩ có thể chứa thông tin ngoài grading; đó không tự động là lỗi nhãn.
+ETL chỉ xuất `dataset_master.csv` và `dataset_patients.jsonl`; đã bỏ SFT legacy VI/EN và file mẫu một bệnh nhân. V1 đọc CSV cùng NIfTI. V2 chuyển JSONL thành request qua `build_v2_inputs.py`; target fine-tune phải có review và liên kết đúng hash input qua `build_v2_targets.py`. Báo cáo đầy đủ của bác sĩ có thể chứa thông tin ngoài grading; đó không tự động là lỗi nhãn.
+
+## Cấu trúc cần dùng
+
+| Thư mục | Mục đích |
+|---|---|
+| `notebooks/` | Ba notebook Kaggle ở trên |
+| `src/`, `configs/` | Code V1/V2 và cấu hình chạy |
+| `dataset_local/` | Nguồn riêng tư giữ nguyên để tái tạo dữ liệu và xây vision engine |
+| `dataset/` | Hai file dữ liệu gộp; bộ đóng gói Kaggle local nếu có |
+| `schemas/`, `examples/` | Contract và ví dụ hoàn toàn giả lập |
+| `scripts/` | ETL, cloud prepare/run, môi trường, đánh giá và audit/EDA |
+| `tests/` | Kiểm thử phần mềm trên CPU |
+| `docs/` | Hướng dẫn, trạng thái, báo cáo nghiên cứu còn cần dùng |
+| `reports/` | Bản Excel EDA riêng tư lưu local |
+| `output/` | Kết quả sinh khi chạy, không commit |
+
+`consolidate_dataset.py` tái tạo dữ liệu; `cloud_prepare.py` và `cloud_run.py` điều phối Kaggle. Giữ `preflight_v1.py`, `check_environment.py`, các script evaluate và audit để kiểm tra trước/sau train. Notebook đã là file độc lập, không cần script sinh notebook.
 
 Dữ liệu PSPINES không phân phối công khai. Tuân thủ quyền sử dụng của nguồn dữ liệu; `.gitignore` loại ảnh, dữ liệu gốc, derived outputs và checkpoint khỏi repo. Không có kết quả calibration, tỷ lệ lỗi LLM hoặc hiệu quả lâm sàng được khẳng định khi chưa đo.

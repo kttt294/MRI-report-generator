@@ -6,9 +6,8 @@ vào thư mục chuẩn `dataset/`, tạo ra các tệp dữ liệu tinh gọn, 
 Các tệp được tạo ra trong `dataset/`:
 1. dataset_master.csv: Bảng tổng hợp chi tiết theo từng tầng đĩa đệm (1,235 dòng: 247 ca x 5 tầng).
 2. dataset_patients.jsonl: Dữ liệu cấu trúc cấp bệnh nhân (247 dòng), chứa đầy đủ metadata, 5 tầng grading, toạ độ, fold split và báo cáo Việt/Anh.
-3. sft_fold1_train_vi.jsonl, sft_fold1_val_vi.jsonl, sft_fold1_test_vi.jsonl: Bộ dữ liệu Prompt-Response SFT tiếng Việt (Fold 1).
-4. sft_fold1_train_en.jsonl, sft_fold1_val_en.jsonl, sft_fold1_test_en.jsonl: Bộ dữ liệu Prompt-Response SFT tiếng Anh (Fold 1).
-5. README.md: Tài liệu hướng dẫn sử dụng và lược đồ dữ liệu (schema).
+Không sinh SFT legacy hoặc bản sao một bệnh nhân. Target train V2 được chuẩn bị
+riêng bằng build_v2_targets.py và cần người chuyên môn duyệt.
 """
 
 import os
@@ -255,11 +254,7 @@ def consolidate(source="dataset_local", output="dataset"):
                 "vi": {
                     "technique": vi_reports.get(pid, {}).get("ky_thuat", ""),
                     "findings": vi_reports.get(pid, {}).get("mo_ta_list", []),
-                    "impression": vi_reports.get(pid, {}).get("ket_luan_list", []),
-                    # Giữ alias tương thích ngược
-                    "ky_thuat": vi_reports.get(pid, {}).get("ky_thuat", ""),
-                    "mo_ta": vi_reports.get(pid, {}).get("mo_ta_list", []),
-                    "ket_luan": vi_reports.get(pid, {}).get("ket_luan_list", [])
+                    "impression": vi_reports.get(pid, {}).get("ket_luan_list", [])
                 },
                 "en": {
                     "clinicians_notes": en_reports.get(pid, {}).get("report_en", ""),
@@ -275,91 +270,8 @@ def consolidate(source="dataset_local", output="dataset"):
             f.write(json.dumps(item, ensure_ascii=False, allow_nan=False) + "\n")
     print(f" -> Đã lưu: {patients_jsonl_path} ({len(patient_level_data)} ca bệnh nhân).")
 
-    # Lưu tệp mẫu 1 bệnh nhân với cấu trúc đẹp mắt
-    sample_patient_path = OUT_DIR / "data_of_1patient.json"
-    with open(sample_patient_path, "w", encoding="utf-8") as f:
-        json.dump(patient_level_data[0], f, ensure_ascii=False, indent=2, allow_nan=False)
-    print(f" -> Đã lưu mẫu chuẩn: {sample_patient_path}")
-
-    # 8. TẠO DATASET HUẤN LUYỆN SFT CHO FOLD 1 (Prompt -> Response)
-    def format_vi_prompt(levels_info, demo):
-        age_str = f"Tuổi: {demo['age_at_scan']}, " if demo.get("age_at_scan") else ""
-        sex_str = f"Giới tính: {demo['sex']}\n" if demo.get("sex") else "\n"
-        prompt = f"[THÔNG TIN BỆNH NHÂN]: {age_str}{sex_str}"
-        prompt += "[KẾT QUẢ KHẢO SÁT 5 TẦNG ĐĨA ĐỆM CỘT SỐNG THẮT LƯNG]:\n"
-        for lvl in levels_info:
-            g = lvl["gradings"]
-            name = lvl["level"]
-            details = []
-            if g.get("pfirrmann_grade"): details.append(f"Thoái hóa Pfirrmann độ {g['pfirrmann_grade']}")
-            if g.get("disc_herniation"): details.append("Có thoát vị đĩa đệm")
-            if g.get("disc_bulging"): details.append("Có phình đĩa đệm")
-            if g.get("disc_narrowing"): details.append("Có hẹp khe đĩa đệm")
-            if g.get("spondylolisthesis"): details.append("Có trượt đốt sống")
-            if g.get("modic"): details.append("Có thoái hóa Modic")
-            if not details: details.append("Bình thường, không tổn thương rõ")
-            prompt += f"- Tầng {name}: {', '.join(details)}.\n"
-        prompt += "\n[YÊU CẦU]: Dựa trên các phát hiện bệnh lý trên, hãy viết phần MÔ TẢ và KẾT LUẬN báo cáo cộng hưởng từ cột sống thắt lưng."
-        return prompt
-
-    def format_vi_response(rep_vi):
-        findings_list = rep_vi.get("findings", rep_vi.get("mo_ta", []))
-        impression_list = rep_vi.get("impression", rep_vi.get("ket_luan", []))
-        mota = "\n".join(f"- {c}" for c in findings_list)
-        ketluan = "\n".join(f"- {c}" for c in impression_list)
-        return f"[MÔ TẢ]:\n{mota}\n\n[KẾT LUẬN]:\n{ketluan}"
-
-    def format_en_prompt(levels_info, demo):
-        age_str = f"Age: {demo['age_at_scan']}, " if demo.get("age_at_scan") else ""
-        sex_str = f"Sex: {demo['sex']}\n" if demo.get("sex") else "\n"
-        prompt = f"[PATIENT INFORMATION]: {age_str}{sex_str}"
-        prompt += "[LUMBAR SPINE FINDINGS (L1-S1)]:\n"
-        for lvl in levels_info:
-            g = lvl["gradings"]
-            name = lvl["level"]
-            details = []
-            if g.get("pfirrmann_grade"): details.append(f"Pfirrmann Grade {g['pfirrmann_grade']}")
-            if g.get("disc_herniation"): details.append("Disc Herniation")
-            if g.get("disc_bulging"): details.append("Disc Bulging")
-            if g.get("disc_narrowing"): details.append("Disc Narrowing")
-            if g.get("spondylolisthesis"): details.append("Spondylolisthesis")
-            if g.get("modic"): details.append("Modic change")
-            if not details: details.append("Normal limits")
-            prompt += f"- Level {name}: {', '.join(details)}.\n"
-        prompt += "\n[INSTRUCTION]: Generate the complete Clinician's Notes based on these findings."
-        return prompt
-
-    # Tạo thư mục con sft_data
-    sft_dir = OUT_DIR / "sft_data"
-    sft_dir.mkdir(exist_ok=True)
-
-    for split in ["train", "val", "test"]:
-        sft_vi_items = []
-        sft_en_items = []
-
-        for p in patient_level_data:
-            if p["folds"].get("fold1") == split:
-                # Tiếng Việt
-                rep_vi = p["reports"]["vi"]
-                if rep_vi.get("mo_ta") or rep_vi.get("ket_luan"):
-                    prompt_vi = format_vi_prompt(p["levels"], p["demographics"])
-                    resp_vi = format_vi_response(rep_vi)
-                    sft_vi_items.append({"patient_id": p["patient_id"], "prompt": prompt_vi, "response": resp_vi})
-
-                # Tiếng Anh
-                rep_en = p["reports"]["en"]
-                if rep_en.get("clinicians_notes"):
-                    prompt_en = format_en_prompt(p["levels"], p["demographics"])
-                    resp_en = rep_en["clinicians_notes"]
-                    sft_en_items.append({"patient_id": p["patient_id"], "prompt": prompt_en, "response": resp_en})
-
-        # Ghi file
-        with open(sft_dir / f"sft_fold1_{split}_vi.jsonl", "w", encoding="utf-8") as f:
-            for it in sft_vi_items: f.write(json.dumps(it, ensure_ascii=False) + "\n")
-        with open(sft_dir / f"sft_fold1_{split}_en.jsonl", "w", encoding="utf-8") as f:
-            for it in sft_en_items: f.write(json.dumps(it, ensure_ascii=False) + "\n")
-
-        print(f" -> Fold 1 [{split}]: Tạo xong {len(sft_vi_items)} mẫu SFT tiếng Việt, {len(sft_en_items)} mẫu tiếng Anh.")
+    # Only the two shared dataset files are exported. V2 training targets are
+    # prepared separately with build_v2_targets.py after human review.
 
     print("\n" + "=" * 60)
     print(f"HOÀN TẤT HỢP NHẤT DỮ LIỆU! Toàn bộ file đã được tạo tại: {OUT_DIR.resolve()}")

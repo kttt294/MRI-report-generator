@@ -12,13 +12,6 @@ Toàn bộ thông tin về nhãn bệnh lý 5 tầng đĩa đệm, toạ độ k
 dataset/
 ├── dataset_master.csv          # Bảng tổng hợp phẳng chi tiết theo từng tầng (1.235 dòng, 42 cột)
 ├── dataset_patients.jsonl      # Dữ liệu phân tầng cấp bệnh nhân (247 dòng)
-├── sft_data/                   # Export legacy để truy vết; chưa duyệt cho V2 LoRA (Fold 1)
-│   ├── sft_fold1_train_vi.jsonl (142 mẫu tiếng Việt)
-│   ├── sft_fold1_val_vi.jsonl   (49 mẫu tiếng Việt)
-│   ├── sft_fold1_test_vi.jsonl  (47 mẫu tiếng Việt)
-│   ├── sft_fold1_train_en.jsonl (140 mẫu tiếng Anh)
-│   ├── sft_fold1_val_en.jsonl   (49 mẫu tiếng Anh)
-│   └── sft_fold1_test_en.jsonl  (47 mẫu tiếng Anh)
 └── README.md                   # Tài liệu này
 ```
 
@@ -49,11 +42,11 @@ Mỗi dòng đại diện cho một tầng đĩa đệm cụ thể của bệnh 
   * `report_vi_impression` (alias `report_vi_ketluan`): Phần kết luận lâm sàng (tiếng Việt).
   * `report_en`: Bản Clinician's Notes (tiếng Anh).
 
-### B. `dataset_patients.jsonl` (247 dòng) & `data_of_1patient.json`
+### B. `dataset_patients.jsonl` (247 dòng)
 Mỗi dòng là một JSON độc lập biểu diễn một bệnh nhân hoàn chỉnh:
 * Chứa mảng `levels`: bao gồm đầy đủ 5 tầng kèm toạ độ và nhãn.
 * Chứa trường `reports`: chuẩn hóa theo chuẩn quốc tế:
-  * `reports.vi`: `technique`, `findings[]`, `impression[]` (kèm alias `ky_thuat`, `mo_ta`, `ket_luan`).
+  * `reports.vi`: chỉ xuất `technique`, `findings[]`, `impression[]`; bộ nhập vẫn đọc tên cũ trong nguồn. Alias cột CSV được giữ để tương thích. Nhãn thiếu là `null`, không phải `0`.
   * `reports.en`: `clinicians_notes`, `split`.
 * Rất thuận tiện để load vào Python:
   ```python
@@ -62,16 +55,13 @@ Mỗi dòng là một JSON độc lập biểu diễn một bệnh nhân hoàn c
       patients = [json.loads(line) for line in f]
   ```
 
-### C. Thư mục `sft_data/` — legacy, chưa duyệt cho V2
-Giữ lại để truy vết và thực nghiệm đối chứng. Báo cáo gốc có thể chứa thông tin ngoài tám grading; không tự dùng toàn bộ làm ground truth cho V2 hướng A. Pipeline V2 train chỉ nhận target có review, scope và hash input hợp lệ.
+### C. Dữ liệu cho V1 và V2
 
-Ví dụ định dạng **hoàn toàn giả lập**:
+V1 đọc CSV và ảnh NIfTI. V2 dùng `build_v2_inputs.py` để chuyển JSONL thành request chỉ có grading; không đưa báo cáo gốc vào prompt.
 
-```json
-{"patient_id": "synthetic-example", "prompt": "Ví dụ dữ kiện giả lập", "response": "Ví dụ câu trả lời giả lập"}
-```
+V2 fine-tune chỉ nhận target đã duyệt do `build_v2_targets.py` chuẩn bị, có scope và hash input hợp lệ. Split test chỉ dùng đánh giá, không dùng huấn luyện.
 
-Giá trị grading thiếu phải giữ `null`; JSON legacy cần được đối chiếu CSV bằng adapter trước khi dùng. Request suy luận V2 nằm riêng với reports và folds; xem `examples/report_request.synthetic.json`.
+Đã bỏ export SFT VI/EN cũ và bản sao một bệnh nhân. Ví dụ contract giả lập nằm ở `examples/report_request.synthetic.json`. Dữ liệu tiếng Anh trong hai file chính được giữ để truy vết nguồn; pipeline mặc định dùng tiếng Việt.
 
 ---
 
