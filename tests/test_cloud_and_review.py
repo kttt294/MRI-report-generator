@@ -9,8 +9,35 @@ from src.report.planner import template_draft, make_plan
 from src.report.experiments import ablate, summarize, wilson
 from src.report.backends.base import Completion
 from src.data.v2_dataset import load_reviewed_targets
-from scripts.cloud_prepare import prepare
+from scripts.cloud_prepare import prepare, resolve_annotations_root
 from scripts.summarize_review import summarize as summarize_review
+
+
+def test_annotations_root_nested_and_ambiguous(tmp_path):
+    mount = tmp_path / "dataset-mount"
+    source = mount / "dataset" / "annotations"
+    for relative in ("grading/grading_all.csv", "localize/disc_localization.csv"):
+        path = source / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.touch()
+    (source / "folds").mkdir()
+    assert resolve_annotations_root(source) == source.resolve()
+    assert resolve_annotations_root(mount) == source.resolve()
+    with pytest.raises(ValueError, match="outside annotations"):
+        prepare(mount, mount / "generated")
+    import shutil
+    shutil.copytree(source, mount / "second-dataset")
+    with pytest.raises(ValueError, match="Multiple annotations"):
+        resolve_annotations_root(mount)
+    assert resolve_annotations_root(source) == source.resolve()
+
+
+def test_annotations_root_missing_and_incomplete(tmp_path):
+    with pytest.raises(ValueError, match="does not exist"):
+        resolve_annotations_root(tmp_path / "missing")
+    (tmp_path / "annotations.zip").touch()
+    with pytest.raises(ValueError, match="grading/grading_all.csv"):
+        resolve_annotations_root(tmp_path)
 
 
 def test_notebooks_thin_clear_and_valid():
