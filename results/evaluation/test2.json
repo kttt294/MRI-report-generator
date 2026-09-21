@@ -1,0 +1,190 @@
+{
+  "findings": [
+    {
+      "text": "Tại tầng L1/L2: Pfirrmann độ 3.",
+      "evidence_ids": ["L1/L2:pfirrmann_grade"]
+    },
+    {
+      "text": "Tại tầng L1/L2: không có biến đổi Modic.",
+      "evidence_ids": ["L1/L2:modic"]
+    },
+    {
+      "text": "Tại tầng L1/L2: không có thoát vị đĩa đệm.",
+      "evidence_ids": ["L1/L2:disc_herniation"]
+    },
+    {
+      "text": "Tại tầng L1/L2: không có phình đĩa đệm.",
+      "evidence_ids": ["L1/L2:disc_bulging"]
+    },
+    {
+      "text": "Tại tầng L1/L2: không có giảm chiều cao khe đĩa đệm.",
+      "evidence_ids": ["L1/L2:disc_narrowing"]
+    },
+    {
+      "text": "Tại tầng L1/L2: không có trượt đốt sống.",
+      "evidence_ids": ["L1/L2:spondylolisthesis"]
+    },
+    {
+      "text": "Tại tầng L1/L2: không có bất thường bản đệm trên.",
+      "evidence_ids": ["L1/L2:up_endplate"]
+    },
+    {
+      "text": "Tại tầng L1/L2: không có bất thường bản đệm dưới.",
+      "evidence_ids": ["L1/L2:low_endplate"]
+    },
+    {
+      "text": "Tại tầng L2/L3: Pfirrmann độ 3.",
+      "evidence_ids": ["L2/L3:pfirrmann_grade"]
+    },
+    {
+      "text": "Tại tầng L2/L3: không có biến đổi Modic.",
+      "evidence_ids": ["L2/L3:modic"]
+    },
+    {
+      "text": "Tại tầng L2/L3: không có thoát vị đĩa đệm.",
+      "evidence_ids": ["L2/L3:disc_herniation"]
+    },
+    {
+      "text": "Tại tầng L2/L3: không có phình đĩa đệm.",
+      "evidence_ids": ["L2/L3:disc_bulging"]
+    },
+    {
+      "text": "Tại tầng L2/L3: không có giảm chiều cao khe đĩa đệm.",
+      "evidence_ids": ["L2/L3:disc_narrowing"]
+    },
+    {
+      "text": "Tại tầng L2/L3: không có trượt đốt sống.",
+      "evidence_ids": ["L2/L3:spondylolisthesis"]
+    },
+    {
+      "text": "Tại tầng L2/L3: không có bất thường bản đệm trên.",
+      "evidence_ids": ["L2/L3:up_endplate"]
+    },
+    {
+      "text": "Tại tầng L2/L3: không có bất thường bản đệm dưới.",
+      "evidence_ids": ["L2/L3:low_endplate"]
+    },
+    {
+      "text": "Tại tầng L3/L4: Pfirrmann độ 3.",
+      "evidence_ids": ["L3/L4:pfirrmann_grade"]
+    },
+    {
+      "text": "Tại tầng L3/L4: không có biến đổi Modic.",
+      "evidence_ids": ["L3/L4:modic"]
+    },
+    {
+      "text": "Tại tầng L3/L4: không có thoát vị đĩa đệm.",
+      "evidence_ids": ["L3/L4:disc_herniation"]
+    },
+    {
+      "text": "Tại tầng L3/L4: không có phình đĩa đệm.",
+      "evidence_ids": ["L3/L4:disc_bulging"]
+    },
+    {
+      "text": "Tại tầng L3/L4: không có giảm chiều cao khe đĩa đệm.",
+      "evidence_ids": ["L3/L4:disc_narrowing"]
+    },
+    {
+      "text": "Tại tầng L3/L4: không có trượt đốt sống.",
+      "evidence_ids": ["L3/L4:spondylolisthesis"]
+    },
+    {
+      "text": "Tại tầng L3/L4: không có bất thường bản đệm trên.",
+      "evidence_ids": ["L3/L4:up_endplate"]
+    },
+    {
+      "text": "Tại tầng L3/L4: không có bất thường bản đệm dưới.",
+      "evidence_ids": ["L3/L4:low_endplate"]
+    },
+    {
+      "text": "Tại tầng L4/L5: Pfirrmann độ 2.",
+      "evidence_ids": ["L4/L5:pfirrmann_grade"]
+    },
+    {
+      "text": "Tại tầng L4/L5: không có biến đổi Modic.",
+      "evidence_ids": ["L4/L5:modic"]
+    },
+    {
+      "text": "Tại tầng L4/L5: không có thoát vị đĩa đệm.",
+      "evidence_ids": ["L4/L5:disc_herniation"]
+    },
+    {
+      "text": "Tại tầng L4/L5: không có phình đĩa đệm.",
+      "evidence_ids": ["L4/L5:disc_bulging"]
+    },
+    {
+      "text": "Tại tầng L4/L5: không có giảm chiều cao khe đĩa đệm.",
+      "evidence_ids": ["L4/L5:disc_narrowing"]
+    },
+    {
+      "text": "Tại tầng L4/L5: không có trượt đốt sống.",
+      "evidence_ids": ["L4/L5:spondylolisthesis"]
+    },
+    {
+      "text": "Tại tầng L4/L5: không có bất thường bản đệm trên.",
+      "evidence_ids": ["L4/L5:up_endplate"]
+    },
+    {
+      "text": "Tại tầng L4/L5: không có bất thường bản đệm dưới.",
+      "evidence_ids": ["L4/L5:low_endplate"]
+    },
+    {
+      "text": "Tại tầng L5/S1: Pfirrmann độ 2.",
+      "evidence_ids": ["L5/S1:pfirrmann_grade"]
+    },
+    {
+      "text": "Tại tầng L5/S1: không có biến đổi Modic.",
+      "evidence_ids": ["L5/S1:modic"]
+    },
+    {
+      "text": "Tại tầng L5/S1: không có thoát vị đĩa đệm.",
+      "evidence_ids": ["L5/S1:disc_herniation"]
+    },
+    {
+      "text": "Tại tầng L5/S1: có phình đĩa đệm.",
+      "evidence_ids": ["L5/S1:disc_bulging"]
+    },
+    {
+      "text": "Tại tầng L5/S1: không có giảm chiều cao khe đĩa đệm.",
+      "evidence_ids": ["L5/S1:disc_narrowing"]
+    },
+    {
+      "text": "Tại tầng L5/S1: không có trượt đốt sống.",
+      "evidence_ids": ["L5/S1:spondylolisthesis"]
+    },
+    {
+      "text": "Tại tầng L5/S1: không có bất thường bản đệm trên.",
+      "evidence_ids": ["L5/S1:up_endplate"]
+    },
+    {
+      "text": "Tại tầng L5/S1: không có bất thường bản đệm dưới.",
+      "evidence_ids": ["L5/S1:low_endplate"]
+    }
+  ],
+  "impression": [
+    {
+      "text": "Tại tầng L1/L2: Pfirrmann độ 3.",
+      "evidence_ids": ["L1/L2:pfirrmann_grade"]
+    },
+    {
+      "text": "Tại tầng L2/L3: Pfirrmann độ 3.",
+      "evidence_ids": ["L2/L3:pfirrmann_grade"]
+    },
+    {
+      "text": "Tại tầng L3/L4: Pfirrmann độ 3.",
+      "evidence_ids": ["L3/L4:pfirrmann_grade"]
+    },
+    {
+      "text": "Tại tầng L4/L5: Pfirrmann độ 2.",
+      "evidence_ids": ["L4/L5:pfirrmann_grade"]
+    },
+    {
+      "text": "Tại tầng L5/S1: Pfirrmann độ 2.",
+      "evidence_ids": ["L5/S1:pfirrmann_grade"]
+    },
+    {
+      "text": "Tại tầng L5/S1: có phình đĩa đệm.",
+      "evidence_ids": ["L5/S1:disc_bulging"]
+    }
+  ]
+}

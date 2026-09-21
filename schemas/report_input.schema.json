@@ -27,9 +27,18 @@
           "type": "string"
         },
         "uncertainty": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "default": null,
-          "title": "Uncertainty",
-          "type": "null"
+          "title": "Uncertainty"
         }
       },
       "required": [
@@ -132,9 +141,18 @@
           "type": "string"
         },
         "uncertainty": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "default": null,
-          "title": "Uncertainty",
-          "type": "null"
+          "title": "Uncertainty"
         }
       },
       "required": [
@@ -171,9 +189,18 @@
           "type": "string"
         },
         "uncertainty": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "default": null,
-          "title": "Uncertainty",
-          "type": "null"
+          "title": "Uncertainty"
         }
       },
       "required": [

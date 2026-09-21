@@ -1,0 +1,29 @@
+{
+  "patients": 50,
+  "fold": 1,
+  "split": "test",
+  "checkpoint_step": 25,
+  "bleu4": {
+    "score": 100.00000000000004,
+    "scale": "0-100",
+    "tokenizer": "none"
+  },
+  "rouge1": {
+    "f1": 1.0
+  },
+  "rougeL": {
+    "f1": 1.0
+  },
+  "bertscore": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "model": "bert-base-multilingual-cased",
+    "truncated_pairs": 50,
+    "max_model_tokens": 512
+  },
+  "generation_methods": {
+    "llm": 50
+  },
+  "reference_exact_template_count": 50
+}

@@ -1,6 +1,6 @@
 # Hướng dẫn Kaggle cho người mới — dự án MRI V1/V2
 
-Cập nhật: 18/09/2026. Dành cho người đã verified tài khoản Kaggle, chưa quen tạo Dataset và Notebook.
+Cập nhật: 18/09/2026
 
 **Mục tiêu:** ảnh và nhãn ở Kaggle private; code ở GitHub public; mở notebook, chọn vài tham số rồi gọi các script `.py` để chạy. Không viết Dataset, model hay vòng lặp train trong cell.
 
@@ -15,11 +15,11 @@ Cập nhật: 18/09/2026. Dành cho người đã verified tài khoản Kaggle, 
 
 ## 1. Hiểu ba thành phần cần dùng
 
-| Tên | Hiểu đơn giản | Dự án này dùng thế nào? |
-|---|---|---|
-| GitHub repository | Nơi lưu code | Public, chỉ code/config/docs và dữ liệu giả lập phục vụ test |
-| Kaggle Dataset | Nơi lưu file để notebook đọc | Private, gồm ảnh và nhãn của dự án |
-| Kaggle Notebook | Trang chứa các ô lệnh, chạy trên máy Kaggle | Private; tải code GitHub, đọc Dataset, chạy script và lưu kết quả |
+| Tên              | Hiểu đơn giản                                  | Dự án này dùng thế nào?                                             |
+| ----------------- | -------------------------------------------------- | ------------------------------------------------------------------------- |
+| GitHub repository | Nơi lưu code                                     | Public, chỉ code/config/docs và dữ liệu giả lập phục vụ test      |
+| Kaggle Dataset    | Nơi lưu file để notebook đọc                 | Private, gồm ảnh và nhãn của dự án                                 |
+| Kaggle Notebook   | Trang chứa các ô lệnh, chạy trên máy Kaggle | Private; tải code GitHub, đọc Dataset, chạy script và lưu kết quả |
 
 **Public code không có nghĩa public dữ liệu.** Notebook chạy dữ liệu thật cũng nên giữ private vì outputs có thể chứa báo cáo hoặc mã bệnh nhân.
 
@@ -97,12 +97,12 @@ Kaggle có thể giải nén archive khi nhập dữ liệu; hãy kiểm tra c�
 
 Sau upload, ghi lại:
 
-| Thông tin | Ảnh | Annotations |
-|---|---|---|
-| URL hoặc `owner/slug` | Điền URL bộ A | Điền URL bộ B |
-| Version dùng cho run đầu | Điền số version | Điền số version |
-| Visibility | Private | Private |
-| Số file và dung lượng | So với bản nguồn | So với bản nguồn |
+| Thông tin                  | Ảnh                | Annotations         |
+| --------------------------- | ------------------- | ------------------- |
+| URL hoặc`owner/slug`     | Điền URL bộ A    | Điền URL bộ B    |
+| Version dùng cho run đầu | Điền số version  | Điền số version  |
+| Visibility                  | Private             | Private             |
+| Số file và dung lượng   | So với bản nguồn | So với bản nguồn |
 
 Số file ảnh **không nhất thiết bằng 247**: một người có thể có nhiều chuỗi hoặc file phụ. Kiểm tra theo danh sách volume thực sự cần cho cohort; script preflight sẽ làm phần này. Khi cập nhật nhãn, tạo version mới của bộ B và ghi lại version, không đổi cả ảnh nếu ảnh không thay đổi.
 
@@ -121,9 +121,9 @@ Không gõ cứng một đường dẫn lấy từ ví dụ trên mạng. Datase
 
 Hai vùng file cần phân biệt:
 
-| Vùng | Dùng để làm gì? |
-|---|---|
-| `/kaggle/input/...` | Đọc dataset đã gắn. Không lưu CSV mới, cache hoặc checkpoint vào đây |
+| Vùng                   | Dùng để làm gì?                                                                    |
+| ----------------------- | --------------------------------------------------------------------------------------- |
+| `/kaggle/input/...`   | Đọc dataset đã gắn. Không lưu CSV mới, cache hoặc checkpoint vào đây        |
 | `/kaggle/working/...` | Code checkout và kết quả của run; các file cần lưu thành outputs đặt ở đây |
 
 V1 cần cả hai inputs. Notebook V2 report chỉ cần annotations; không cần đọc 9 GB ảnh.
@@ -164,16 +164,16 @@ P100 không còn là lựa chọn nên dựa vào: Kaggle thông báo ngừng P1
 
 Các tham số người dùng sẽ điền trong notebook:
 
-| Tham số | Cách chọn lần đầu |
-|---|---|
-| Code ref | Commit/tag đã được giao cùng notebook |
-| Images root | Path thật của folder NIfTI từ Add Input |
-| Annotations root | Path thật chứa `grading`, `folds`, `localize`, `reports_json` |
-| Fold | `1` |
-| Run name | Tên mới, ví dụ `v1_fold1_smoke_01` |
-| Mode | `smoke` cho lần đầu; chưa chọn `full` |
-| Resume from | Để trống cho run đầu |
-| Time budget | Theo quota/giới hạn hiện tại, chừa thời gian lưu output |
+| Tham số         | Cách chọn lần đầu                                                 |
+| ---------------- | ---------------------------------------------------------------------- |
+| Code ref         | Commit/tag đã được giao cùng notebook                            |
+| Images root      | Path thật của folder NIfTI từ Add Input                             |
+| Annotations root | Path thật chứa`grading`, `folds`, `localize`, `reports_json` |
+| Fold             | `1`                                                                  |
+| Run name         | Tên mới, ví dụ`v1_fold1_smoke_01`                                |
+| Mode             | `smoke` cho lần đầu; chưa chọn `full`                         |
+| Resume from      | Để trống cho run đầu                                              |
+| Time budget      | Theo quota/giới hạn hiện tại, chừa thời gian lưu output         |
 
 Tên tham số chính xác nằm trong dictionary `CONFIG`: `annotations_root`, `images_root`, `annotations_dataset`, `images_dataset`, `fold`, `run_name`, `mode`, `resume_from`, `max_runtime_minutes`. Hai trường dataset ghi dạng `owner/slug/version`, ví dụ `tenban/lumbar-mri-images/1`. Dùng path thực tế từ Add Input, không chép nguyên `CHANGE-ME`.
 
@@ -257,32 +257,32 @@ Nếu phiên cũ mất trước khi checkpoint được lưu ra outputs hoặc b
 
 ## 11. V2 khác V1 ở đâu khi dùng Kaggle?
 
-| Công việc | Input | GPU |
-|---|---|---|
-| Train V1 ảnh → report | Ảnh + annotations | Có |
-| Chuyển dữ liệu sang JSON hướng A | Annotations | Không cần |
-| V2 template baseline | JSON hướng A | Không cần |
-| V2 LLM sinh report | JSON + model text | Thường nên có |
-| Fine-tune V2 LoRA | Cặp JSON–report được kiểm tra và model | Có; chưa tự bật từ SFT cũ |
+| Công việc                           | Input                                         | GPU                             |
+| ------------------------------------- | --------------------------------------------- | ------------------------------- |
+| Train V1 ảnh → report               | Ảnh + annotations                            | Có                             |
+| Chuyển dữ liệu sang JSON hướng A | Annotations                                   | Không cần                     |
+| V2 template baseline                  | JSON hướng A                                | Không cần                     |
+| V2 LLM sinh report                    | JSON + model text                             | Thường nên có               |
+| Fine-tune V2 LoRA                     | Cặp JSON–report được kiểm tra và model | Có; chưa tự bật từ SFT cũ |
 
 JSON hiện tại là annotation dùng thay đầu ra vision trong thí nghiệm, không phải kết quả một vision engine đã được huấn luyện. V2 chạy template thành công không có nghĩa LLM đã được train hoặc đã đo xong chất lượng lâm sàng.
 
 ## 12. Các lỗi thường gặp
 
-| Bạn thấy gì? | Cách xử lý |
-|---|---|
-| Không tìm thấy dataset private | Đúng tài khoản chủ sở hữu/cộng tác viên chưa? Đã Add Input chưa? |
-| Thiếu `nifti` hoặc file ảnh | Mở cây Input và lấy đúng path; kiểm tra upload đủ các ZIP/phần download |
-| Read-only file system | Đang ghi vào input; output phải trỏ sang working |
-| Không chọn được GPU | Xem verification, quota và tài nguyên đang có; chờ nếu chưa được cấp, không cần đổi dữ liệu sang public |
-| Clone/pip/model download lỗi | Bật Internet; đọc lỗi cụ thể, không chạy tiếp cell train |
-| Không có script/notebook trên GitHub | Code mới chưa push hoặc checkout sai ref; không tự chép implementation vào cell |
-| Thiếu `src.models` hoặc lỗi collator của V1 cũ | Dùng nhầm bản chưa sửa; kiểm tra release ref theo bước 0 |
-| CUDA out of memory | Dừng run; giảm batch/ảnh/token theo config đã hỗ trợ, giữ train/val policy nhất quán; đừng xóa target âm thầm |
-| GPU thứ hai không hoạt động | Có thể đúng thiết kế một GPU của bản đầu; không tự đổi sang đa GPU giữa run |
-| Hết dung lượng output | Kiểm tra checkpoints giữ quá nhiều hoặc cache/ảnh bị copy vào working; giữ backup trước khi dọn |
-| Save & Run All chạy lại từ đầu | Bình thường nếu chưa cấu hình resume; đây là một phiên sạch |
-| Đã Quick Save nhưng không thấy checkpoint | Kiểm tra tùy chọn lưu outputs và nội dung Saved Version; code autosave không đủ |
+| Bạn thấy gì?                                      | Cách xử lý                                                                                                                |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Không tìm thấy dataset private                    | Đúng tài khoản chủ sở hữu/cộng tác viên chưa? Đã Add Input chưa?                                               |
+| Thiếu`nifti` hoặc file ảnh                      | Mở cây Input và lấy đúng path; kiểm tra upload đủ các ZIP/phần download                                           |
+| Read-only file system                                | Đang ghi vào input; output phải trỏ sang working                                                                         |
+| Không chọn được GPU                             | Xem verification, quota và tài nguyên đang có; chờ nếu chưa được cấp, không cần đổi dữ liệu sang public    |
+| Clone/pip/model download lỗi                        | Bật Internet; đọc lỗi cụ thể, không chạy tiếp cell train                                                            |
+| Không có script/notebook trên GitHub              | Code mới chưa push hoặc checkout sai ref; không tự chép implementation vào cell                                       |
+| Thiếu`src.models` hoặc lỗi collator của V1 cũ | Dùng nhầm bản chưa sửa; kiểm tra release ref theo bước 0                                                             |
+| CUDA out of memory                                   | Dừng run; giảm batch/ảnh/token theo config đã hỗ trợ, giữ train/val policy nhất quán; đừng xóa target âm thầm |
+| GPU thứ hai không hoạt động                     | Có thể đúng thiết kế một GPU của bản đầu; không tự đổi sang đa GPU giữa run                                 |
+| Hết dung lượng output                             | Kiểm tra checkpoints giữ quá nhiều hoặc cache/ảnh bị copy vào working; giữ backup trước khi dọn                  |
+| Save & Run All chạy lại từ đầu                  | Bình thường nếu chưa cấu hình resume; đây là một phiên sạch                                                     |
+| Đã Quick Save nhưng không thấy checkpoint       | Kiểm tra tùy chọn lưu outputs và nội dung Saved Version; code autosave không đủ                                     |
 
 ## 13. Checklist ngắn cho lần đầu
 
@@ -296,7 +296,6 @@ JSON hiện tại là annotation dùng thay đầu ra vision trong thí nghiệm
 - [ ] Có backup và đã hiểu cách Add Input checkpoint để resume.
 
 **Việc bạn nên làm trước tiên:** chuẩn bị hai bộ A/B, upload private và ghi lại hai URL dataset. Chưa cần bật GPU hoặc chạy notebook V1 cũ.
-
 
 ## 14. Chạy V2 LLM và chuẩn bị LoRA
 

@@ -17,8 +17,8 @@ class StrictModel(BaseModel):
 class Observation(StrictModel):
     value: StrictInt | None
     status: Literal["observed", "missing", "not_assessed", "uncertain"]
-    # Version 1 has no calibrated vision output. Never fabricate a confidence.
-    uncertainty: None = None
+    # Calibrated vision uncertainty between 0.0 and 1.0; None if uncalibrated or ground-truth annotation.
+    uncertainty: Annotated[float, Field(ge=0.0, le=1.0)] | None = None
 
     @model_validator(mode="after")
     def check_status(self):

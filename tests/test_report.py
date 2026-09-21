@@ -13,6 +13,21 @@ def test_invalid_binary(request_data, value):
     with pytest.raises(ValueError): ReportRequest.model_validate(request_data)
 
 
+def test_uncertainty_domain(request_data):
+    # Null is allowed
+    request_data["levels"][0]["gradings"]["disc_bulging"]["uncertainty"] = None
+    req = ReportRequest.model_validate(request_data)
+    assert req.levels[0].gradings.disc_bulging.uncertainty is None
+    # Valid float in [0.0, 1.0] is allowed
+    request_data["levels"][0]["gradings"]["disc_bulging"]["uncertainty"] = 0.35
+    req = ReportRequest.model_validate(request_data)
+    assert req.levels[0].gradings.disc_bulging.uncertainty == 0.35
+    # Values outside [0.0, 1.0] are rejected
+    for invalid in (-0.1, 1.1, "high", float("nan")):
+        request_data["levels"][0]["gradings"]["disc_bulging"]["uncertainty"] = invalid
+        with pytest.raises(ValueError): ReportRequest.model_validate(request_data)
+
+
 def test_status_extras_and_duplicate_levels(request_data):
     for change in (lambda x: x.update(reports={}),
                    lambda x: x["levels"].__setitem__(1, x["levels"][0]),

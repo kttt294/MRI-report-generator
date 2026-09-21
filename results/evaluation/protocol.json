@@ -1,0 +1,26 @@
+{
+  "designation": "post-hoc frozen evaluation; not preregistered",
+  "code_commit": "570c0f5d8d0f4a7f593e0abbedf9b83bd0858ea7",
+  "training_kernel_version": 4,
+  "checkpoint_step": 25,
+  "fold": 1,
+  "split": "test",
+  "expected_cases": 50,
+  "adapter": "/kaggle/input/mri-v2-checkpoint25-private",
+  "adapter_config_sha256": "78bdd68243c34dca4faeb120699c1e7a7f95e0ba7122d5cafa3a83ce9c4f5294",
+  "reference": "reviewed_targets.jsonl (controlled grading reports, not full original reports)",
+  "decoding": {
+    "do_sample": false,
+    "max_new_tokens": 4096,
+    "max_time_seconds": 600
+  },
+  "metrics": [
+    "BLEU-4",
+    "ROUGE-1",
+    "ROUGE-L",
+    "BERTScore"
+  ],
+  "rouge_tokenizer": "Unicode NFC lowercase whitespace; no stemming",
+  "bertscore": "bert-base-multilingual-cased, standard document scoring, no baseline rescaling; token truncation audited",
+  "warning": "References may equal the deterministic template; report fallback rates separately."
+}

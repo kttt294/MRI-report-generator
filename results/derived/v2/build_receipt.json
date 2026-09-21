@@ -1,0 +1,9 @@
+{
+  "adapter": "legacy-adapter/1.0",
+  "patients_sha256": "32c398fe83d20aa0b95f3442c826e54d17c5b93f0751f373e09f0f56462f6e44",
+  "master_sha256": "dce0eb365dfdaf88a8c3811e1f369fd6bd1f5a54614abff33a58bc855f699e84",
+  "requests": 247,
+  "errors": [],
+  "missing_cells_recovered": 0,
+  "input_kind": "annotations_not_vision_predictions"
+}

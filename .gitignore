@@ -90,6 +90,7 @@ temp/
 Thumbs.db
 desktop.ini
 
+\dataset
 # Private local reports and notebook configuration
 reports/
 .jupyter-config/
