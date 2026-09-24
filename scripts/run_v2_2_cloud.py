@@ -4,6 +4,11 @@ import os
 import sys
 from pathlib import Path
 
+# Kaggle T4 x2: QLoRA model is intentionally placed on one GPU. Set this
+# before importing any module that may initialize torch/CUDA.
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import yaml
 from scripts.cloud_prepare import prepare
