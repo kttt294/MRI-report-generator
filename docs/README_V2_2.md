@@ -15,3 +15,5 @@ Lệnh preflight local không cần GPU:
 `python scripts/v2_2_preflight.py --patients dataset/lumbar-mri-annotations/dataset_patients.jsonl --master dataset/lumbar-mri-annotations/dataset_master.csv --fold 1 --output output/v2_2_preflight.json`
 
 Đánh giá kết quả phải tách điểm NLP so với báo cáo bác sĩ khỏi độ đúng dữ kiện, sai tầng và nhận định không có trong grading. BLEU, ROUGE hay BERTScore cao không tự xác nhận tính đúng lâm sàng.
+
+Kết quả lần chạy đầu tiên được ghi tại `docs/V2_2_first_run_results.md`.
