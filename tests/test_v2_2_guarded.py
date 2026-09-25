@@ -55,6 +55,22 @@ def test_guard_rejects_after_one_failed_retry():
     assert len(calls) == 2
 
 
+def test_guard_uses_explicit_template_fallback_after_one_retry():
+    calls = []
+
+    def generate(prompt):
+        calls.append(prompt)
+        return _answer('{"findings":"F"}')
+
+    result = generate_guarded(
+        "Nguồn grading", generate,
+        fallback=lambda: {"findings": "Pfirrmann độ 2.",
+                          "impression": "Pfirrmann độ 2."})
+    assert result["status"] == "fallback"
+    assert result["report"]["findings"] == "Pfirrmann độ 2."
+    assert len(calls) == 2
+
+
 def test_guard_flags_repetition_even_in_valid_json():
     raw = json.dumps({"findings": "L4/L5 có phình đĩa đệm. " * 20,
                       "impression": "Phình L4/L5."})

@@ -3,6 +3,7 @@
 This guard checks syntax, length, and obvious repetition. It cannot certify
 clinical correctness or whether grouped findings remain unambiguous.
 """
+import json
 import re
 
 from src.report.v2_2_quality import (
@@ -43,8 +44,8 @@ def inspect_generated(raw):
     return gate
 
 
-def generate_guarded(original_prompt, generate):
-    """Call generate(prompt) at most twice; return no report if both fail.
+def generate_guarded(original_prompt, generate, fallback=None):
+    """Call generate(prompt) at most twice; optionally use a scoped fallback.
 
     `generate` must return a dict with `raw_output`, `tokens`, and `seconds`.
     Raw text is retained for private audit but must not be published with PHI.
@@ -66,4 +67,17 @@ def generate_guarded(original_prompt, generate):
         if gate["status"] == "ok":
             return {"status": "ok", "report": gate["report"], "attempts": attempts}
         failure_status = gate["status"]
+    if fallback is not None:
+        fallback_value = fallback()
+        if not isinstance(fallback_value, dict):
+            raise ValueError("Fallback must return a report mapping")
+        report = {key: fallback_value[key] for key in ("findings", "impression")}
+        fallback_gate = inspect_generated(json.dumps(report, ensure_ascii=False))
+        if fallback_gate["status"] == "ok":
+            return {"status": "fallback", "report": report, "attempts": attempts,
+                    "fallback_evidence": {
+                        key: fallback_value.get(key + "_statements", [])
+                        for key in ("findings", "impression")}}
+        return {"status": "rejected", "report": None, "attempts": attempts,
+                "fallback_error": fallback_gate["status"]}
     return {"status": "rejected", "report": None, "attempts": attempts}

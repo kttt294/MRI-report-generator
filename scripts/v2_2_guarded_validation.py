@@ -17,6 +17,7 @@ from scripts.evaluate_v2_2 import load_model
 from src.data.v2_2_dataset import load_samples
 from src.io_utils import file_hash, strict_loads, write_json, write_jsonl
 from src.report.v2_2_guarded import generate_guarded
+from src.report.v2_2_grouped_template import render_grouped_from_prompt
 
 
 MAX_NEW_TOKENS = 1024
@@ -75,7 +76,9 @@ def run(annotations_root, adapter_root, protocol_path, output, limit=10,
     generate = make_generator(model, tokenizer, repetition_penalty, no_repeat_ngram_size)
     rows = []
     for index, sample in enumerate(samples, 1):
-        result = generate_guarded(sample["prompt"], generate)
+        result = generate_guarded(
+            sample["prompt"], generate,
+            fallback=lambda prompt=sample["prompt"]: render_grouped_from_prompt(prompt))
         rows.append({"case_id": sample["case_id"],
                      "input_sha256": sample["input_sha256"],
                      "target_sha256": sample["target_sha256"],
@@ -90,6 +93,7 @@ def run(annotations_root, adapter_root, protocol_path, output, limit=10,
                                       len(r["attempts"]) == 1 for r in rows),
         "recovered_by_retry": sum(r["status"] == "ok" and
                                   len(r["attempts"]) == 2 for r in rows),
+        "grouped_template_fallback": sum(r["status"] == "fallback" for r in rows),
         "rejected_after_retry": sum(r["status"] == "rejected" for r in rows),
         "retry_count": sum(len(r["attempts"]) - 1 for r in rows),
         "attempt_statuses": {status: sum(a["status"] == status for r in rows
