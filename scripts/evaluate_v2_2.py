@@ -208,6 +208,7 @@ def run(annotations_root, adapter_root, protocol_path, output, split="test", lim
     torch.cuda.empty_cache()
     result = {"fold": protocol["fold"], "split": split, "patients": len(records),
               "format_valid": sum(row["status"] == "ok" for row in records),
+              "format_valid_rate": sum(row["status"] == "ok" for row in records) / len(records),
               "format_invalid_json": sum(row["status"] == "invalid_json" for row in records),
               "format_invalid_schema": sum(row["status"] == "invalid_schema" for row in records),
               "hit_token_limit": sum(row["hit_token_limit"] for row in records),

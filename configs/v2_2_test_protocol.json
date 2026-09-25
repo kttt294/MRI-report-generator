@@ -9,7 +9,7 @@
   "base_model": "Qwen/Qwen2.5-3B-Instruct",
   "base_revision": "aa8e72537993ba99e69dfaafa59ed015b17504d1",
   "generation": {
-    "max_new_tokens": 768,
+    "max_new_tokens": 1536,
     "do_sample": false,
     "batch_size": 1,
     "retry_invalid_json": false
