@@ -2,6 +2,7 @@ import json
 
 import pytest
 
+from scripts import evaluate_v2_2
 from scripts.evaluate_v2_2 import aligned_records, parse_report, run
 
 
@@ -32,3 +33,16 @@ def test_test_split_cannot_be_limited_or_skip_metrics(tmp_path):
     for kwargs in ({"limit": 2}, {"skip_metrics": True}):
         with pytest.raises(ValueError, match="score all cases"):
             run(tmp_path, tmp_path, tmp_path / "protocol.json", tmp_path / "new", **kwargs)
+
+
+def test_cli_maps_protocol_to_run_parameter(monkeypatch, capsys):
+    called = {}
+    monkeypatch.setattr(evaluate_v2_2, "run", lambda **kwargs: called.update(kwargs) or {"ok": True})
+    evaluate_v2_2.main(["--annotations-root", "annotations", "--adapter-root", "adapter",
+                        "--protocol", "protocol.json", "--output", "out", "--split", "val",
+                        "--limit", "2", "--skip-metrics"])
+    assert called["protocol_path"] == "protocol.json"
+    assert called["split"] == "val"
+    assert called["limit"] == 2
+    assert called["skip_metrics"] is True
+    assert "ok" in capsys.readouterr().out

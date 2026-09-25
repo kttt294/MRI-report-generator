@@ -220,11 +220,16 @@ def run(annotations_root, adapter_root, protocol_path, output, split="test", lim
     return result
 
 
-if __name__ == "__main__":
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    for name in ("annotations-root", "adapter-root", "protocol", "output"):
+    for name in ("annotations-root", "adapter-root", "output"):
         parser.add_argument("--" + name, required=True)
+    parser.add_argument("--protocol", dest="protocol_path", required=True)
     parser.add_argument("--split", choices=["val", "test"], default="test")
     parser.add_argument("--limit", type=int)
     parser.add_argument("--skip-metrics", action="store_true")
-    print(run(**vars(parser.parse_args())))
+    print(run(**vars(parser.parse_args(argv))))
+
+
+if __name__ == "__main__":
+    main()
