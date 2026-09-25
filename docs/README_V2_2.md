@@ -17,3 +17,7 @@ Lệnh preflight local không cần GPU:
 Đánh giá kết quả phải tách điểm NLP so với báo cáo bác sĩ khỏi độ đúng dữ kiện, sai tầng và nhận định không có trong grading. BLEU, ROUGE hay BERTScore cao không tự xác nhận tính đúng lâm sàng.
 
 Kết quả lần chạy đầu tiên được ghi tại `docs/V2_2_first_run_results.md`.
+
+Để đánh giá adapter, dùng notebook private `notebooks/Kaggle_V2_2_Evaluation.ipynb`. Gắn hai Dataset private `kieuthithutrang/lumbar-mri-annotations/1` và `kieuthithutrang/mri-v2-2-fold1-adapter/1`; chạy `MODE = "smoke"` trên 2 ca validation trước, rồi `MODE = "test"` trên đủ 47 ca test. Protocol `configs/v2_2_test_protocol.json` khóa nguồn dữ liệu, SHA-256 adapter, cách sinh và cách tính metrics. Script `scripts/evaluate_v2_2.py` ghi `metrics.json`, `predictions.jsonl`, `per_patient.jsonl` và `human_review.csv` vào Output private. Không đưa các file chứa văn bản bệnh nhân lên GitHub.
+
+BLEU-4, ROUGE-1, ROUGE-L và BERTScore ở đây so với báo cáo bác sĩ gốc; do bộ tham chiếu khác Phase 1, không so sánh trực tiếp trị số hai thí nghiệm. JSON không hợp lệ được tính là lỗi, không sinh lại hay thay bằng rule. Bảng `human_review.csv` cần bác sĩ điền các lỗi sai tầng, bỏ sót và nhận định không có căn cứ.

@@ -1,0 +1,25 @@
+{
+  "protocol": "v2-2/doctor-original/fold1-test/1",
+  "fold": 1,
+  "test_cases_with_both_sections": 47,
+  "annotations_dataset": "kieuthithutrang/lumbar-mri-annotations/1",
+  "patients_sha256": "32c398fe83d20aa0b95f3442c826e54d17c5b93f0751f373e09f0f56462f6e44",
+  "master_sha256": "dce0eb365dfdaf88a8c3811e1f369fd6bd1f5a54614abff33a58bc855f699e84",
+  "adapter_sha256": "2f81abc5d9dc0408b7d045515987737ba9a85a39b9e1b55e58762bc0e2bf4353",
+  "base_model": "Qwen/Qwen2.5-3B-Instruct",
+  "base_revision": "aa8e72537993ba99e69dfaafa59ed015b17504d1",
+  "generation": {
+    "max_new_tokens": 768,
+    "do_sample": false,
+    "batch_size": 1,
+    "retry_invalid_json": false
+  },
+  "metrics": {
+    "bleu_tokenize": "none",
+    "bleu_smoothing": "exp",
+    "rouge_stemmer": false,
+    "bertscore_model": "bert-base-multilingual-cased",
+    "bertscore_rescale_with_baseline": false,
+    "invalid_prediction_policy": "empty prediction for BLEU/ROUGE and zero for BERTScore"
+  }
+}
