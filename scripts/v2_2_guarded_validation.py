@@ -89,10 +89,11 @@ def run(annotations_root, adapter_root, protocol_path, output, limit=10,
     write_jsonl(output / "predictions.jsonl", rows)
     summary = {
         "split": "val", "patients": len(rows),
-        "valid_on_first_attempt": sum(r["status"] == "ok" and
+        "llm_surface_pass_first": sum(r["attempts"][-1]["status"] == "ok" and
                                       len(r["attempts"]) == 1 for r in rows),
-        "recovered_by_retry": sum(r["status"] == "ok" and
-                                  len(r["attempts"]) == 2 for r in rows),
+        "llm_surface_pass_after_retry": sum(r["attempts"][-1]["status"] == "ok" and
+                                            len(r["attempts"]) == 2 for r in rows),
+        "llm_candidates_needing_review": sum(r.get("candidate") is not None for r in rows),
         "grouped_template_fallback": sum(r["status"] == "fallback" for r in rows),
         "rejected_after_retry": sum(r["status"] == "rejected" for r in rows),
         "retry_count": sum(len(r["attempts"]) - 1 for r in rows),

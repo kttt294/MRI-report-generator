@@ -1,9 +1,11 @@
 from src.contracts.report_input import FIELDS, LEVELS, ReportRequest
-from src.report.v2_2_grouped_template import render_grouped_from_facts
+from src.data.v2_2_dataset import prompt_for
+from src.report.v2_2_grouped_template import render_grouped_from_facts, render_grouped_from_prompt
 
 
 def test_template_groups_identical_facts_and_covers_every_field(report_request):
     result = render_grouped_from_facts(report_request.prompt_facts())
+    assert render_grouped_from_prompt(prompt_for(report_request)) == result
     assert "L1/L2, L2/L3, L3/L4, L4/L5 và L5/S1" in result["findings"]
     evidence = [fid for row in result["findings_statements"] for fid in row["evidence_ids"]]
     assert len(evidence) == len(LEVELS) * len(FIELDS)

@@ -16,7 +16,7 @@ def test_initial_prompt_has_limits_and_unambiguous_grouping_rule():
     assert "hai chuỗi findings và impression" in prompt
 
 
-def test_guard_accepts_first_complete_report_without_retry():
+def test_guard_holds_first_complete_report_for_review_without_retry():
     calls = []
 
     def generate(prompt):
@@ -24,7 +24,9 @@ def test_guard_accepts_first_complete_report_without_retry():
         return _answer('{"findings":"L4/L5: phình đĩa đệm.","impression":"Phình L4/L5."}')
 
     result = generate_guarded("Nguồn grading", generate)
-    assert result["status"] == "ok"
+    assert result["status"] == "needs_review"
+    assert result["report"] is None
+    assert "L4/L5" in result["candidate"]["findings"]
     assert len(calls) == 1
 
 
@@ -37,7 +39,7 @@ def test_guard_retries_missing_impression_once():
         return _answer(next(outputs))
 
     result = generate_guarded("Nguồn grading", generate)
-    assert result["status"] == "ok"
+    assert result["status"] == "needs_review"
     assert len(calls) == 2
     assert "thiếu hoặc sai" in calls[1]
 
@@ -69,6 +71,18 @@ def test_guard_uses_explicit_template_fallback_after_one_retry():
     assert result["status"] == "fallback"
     assert result["report"]["findings"] == "Pfirrmann độ 2."
     assert len(calls) == 2
+
+
+def test_surface_pass_still_uses_template_for_automatic_report():
+    result = generate_guarded(
+        "Nguồn grading",
+        lambda prompt: _answer('{"findings":"F","impression":"I"}'),
+        fallback=lambda: {"findings": "Pfirrmann độ 2.",
+                          "impression": "Pfirrmann độ 2."})
+    assert result["status"] == "fallback"
+    assert result["report"]["findings"] == "Pfirrmann độ 2."
+    assert result["candidate"] == {"findings": "F", "impression": "I"}
+    assert len(result["attempts"]) == 1
 
 
 def test_guard_flags_repetition_even_in_valid_json():

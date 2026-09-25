@@ -44,6 +44,21 @@ def inspect_generated(raw):
     return gate
 
 
+def _scoped_fallback(fallback):
+    fallback_value = fallback()
+    if not isinstance(fallback_value, dict):
+        raise ValueError("Fallback must return a report mapping")
+    report = {key: fallback_value[key] for key in ("findings", "impression")}
+    gate = inspect_generated(json.dumps(report, ensure_ascii=False))
+    if gate["status"] != "ok":
+        return {"status": "rejected", "report": None,
+                "fallback_error": gate["status"]}
+    return {"status": "fallback", "report": report,
+            "fallback_evidence": {
+                key: fallback_value.get(key + "_statements", [])
+                for key in ("findings", "impression")}}
+
+
 def generate_guarded(original_prompt, generate, fallback=None):
     """Call generate(prompt) at most twice; optionally use a scoped fallback.
 
@@ -65,19 +80,16 @@ def generate_guarded(original_prompt, generate, fallback=None):
                          "seconds": generated["seconds"],
                          "raw_output": generated["raw_output"]})
         if gate["status"] == "ok":
-            return {"status": "ok", "report": gate["report"], "attempts": attempts}
+            # Surface checks do not detect semantic nonsense or unsupported
+            # claims phrased outside the small denylist. Keep the LLM draft for
+            # human review; never auto-publish it as a clinical report.
+            result = {"status": "needs_review", "report": None,
+                      "candidate": gate["report"], "attempts": attempts}
+            if fallback is not None:
+                result.update(_scoped_fallback(fallback))
+            return result
         failure_status = gate["status"]
     if fallback is not None:
-        fallback_value = fallback()
-        if not isinstance(fallback_value, dict):
-            raise ValueError("Fallback must return a report mapping")
-        report = {key: fallback_value[key] for key in ("findings", "impression")}
-        fallback_gate = inspect_generated(json.dumps(report, ensure_ascii=False))
-        if fallback_gate["status"] == "ok":
-            return {"status": "fallback", "report": report, "attempts": attempts,
-                    "fallback_evidence": {
-                        key: fallback_value.get(key + "_statements", [])
-                        for key in ("findings", "impression")}}
-        return {"status": "rejected", "report": None, "attempts": attempts,
-                "fallback_error": fallback_gate["status"]}
+        return {**_scoped_fallback(fallback), "attempts": attempts,
+                "candidate": None}
     return {"status": "rejected", "report": None, "attempts": attempts}
