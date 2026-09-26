@@ -1,0 +1,18 @@
+model:
+  name_or_path: Qwen/Qwen3-VL-4B-Instruct
+  revision: ebb281ec70b05090aa6165b016eac8ec08e71b17
+fold: 1
+num_train_epochs: 8
+learning_rate: 0.00015
+gradient_accumulation_steps: 4
+max_sequence_length: 4096
+save_steps: 34
+eval_steps: 34
+warmup_ratio: 0.05
+weight_decay: 0.01
+seed: 42
+generation:
+  max_new_tokens: 1024
+  do_sample: false
+  repetition_penalty: 1.15
+  no_repeat_ngram_size: 5
