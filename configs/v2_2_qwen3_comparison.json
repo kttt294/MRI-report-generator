@@ -1,0 +1,50 @@
+{
+  "comparison": "v2-2-vs-qwen3-vl/fold1-test/1",
+  "fold": 1,
+  "test_cases": 47,
+  "baseline_kernel": "kieuthithutrang/mri-v2-2-evaluation",
+  "baseline_protocol_sha256": "b9be293cb37b4b87975fcce47185be7ec60aa2a6d1b44bc5f9f0b217208618db",
+  "baseline_model": "Qwen/Qwen2.5-3B-Instruct + V2-2 adapter",
+  "candidate": {
+    "model": "Qwen/Qwen3-VL-4B-Instruct",
+    "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+    "adaptation": "none",
+    "input_modality": "text_only",
+    "quantization": "nf4",
+    "compute_dtype": "float16",
+    "attention": "sdpa"
+  },
+  "generation": {
+    "max_new_tokens": 1536,
+    "do_sample": false,
+    "num_beams": 1,
+    "repetition_penalty": 1.05,
+    "no_repeat_ngram_size": 0,
+    "use_cache": true
+  },
+  "generation_note": "repetition_penalty=1.05 was inherited from the frozen Qwen2.5 generation_config in the original run. Sampling controls are inactive in greedy mode. Native chat template and tokenizer EOS/PAD are used per model.",
+  "prompt_manifest_sha256": "3069bd5d49051c8f4aa2df6b2de01265561ddb76e03cb8288359b00d24d7eb68",
+  "frozen_files": {
+    "patients": {
+      "filename": "dataset_patients.jsonl",
+      "sha256": "32c398fe83d20aa0b95f3442c826e54d17c5b93f0751f373e09f0f56462f6e44"
+    },
+    "master": {
+      "filename": "dataset_master.csv",
+      "sha256": "dce0eb365dfdaf88a8c3811e1f369fd6bd1f5a54614abff33a58bc855f699e84"
+    },
+    "baseline_predictions": {
+      "filename": "predictions.jsonl",
+      "sha256": "c16bb20e71d92e9d37e7e4f464330661b20cdb235c5df60459efd8a530059276"
+    },
+    "baseline_metrics": {
+      "filename": "metrics.json",
+      "sha256": "833a2f80d940a03b7d57682b488fb2e7a169001bf8c29ec2a7c25c99737fc6f9"
+    },
+    "baseline_receipt": {
+      "filename": "receipt.json",
+      "sha256": "a6a16a62c1c07588c32b27db90d6c0a35d6d317ea72cdf2dd11851e97694bbfd"
+    }
+  },
+  "bertscore_model": "bert-base-multilingual-cased"
+}

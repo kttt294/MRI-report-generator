@@ -1,0 +1,7 @@
+# Separate evaluation runtime: leave the original V2-2 training pins unchanged.
+# Keep Kaggle's CUDA torch/torchvision installation.
+transformers==4.57.1
+accelerate==1.6.0
+bitsandbytes==0.45.5
+pydantic==2.10.4
+-r requirements-evaluation.txt
